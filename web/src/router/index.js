@@ -3,6 +3,8 @@ import SimpleLayout from '@/layout/SimpleLayout.vue'
 import SimpleDashboard from '@/views/SimpleDashboard.vue'
 import SimpleRecords from '@/views/SimpleRecords.vue'
 import SimpleQuery from '@/views/SimpleQuery.vue'
+import BatchInput from '@/views/BatchInput.vue'
+import DataAnalysis from '@/views/DataAnalysis.vue'
 import ApiTest from '@/views/ApiTest.vue'
 import TestForm from '@/views/TestForm.vue'
 
@@ -30,10 +32,22 @@ const router = createRouter({
           meta: { title: '数据管理' }
         },
         {
+          path: '/batch-input',
+          name: 'BatchInput',
+          component: BatchInput,
+          meta: { title: '批量输入' }
+        },
+        {
           path: '/query',
           name: 'Query',
           component: SimpleQuery,
           meta: { title: '高级查询' }
+        },
+        {
+          path: '/analysis',
+          name: 'DataAnalysis',
+          component: DataAnalysis,
+          meta: { title: '数据分析' }
         },
         {
           path: '/test-form',

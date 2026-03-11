@@ -1,94 +1,193 @@
 <template>
   <div class="query-page">
-    <h2>高级查询</h2>
-    
-    <!-- 查询条件 -->
-    <div class="query-form">
-      <div class="form-section">
-        <h3>基本条件</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label>监测点</label>
-            <input type="text" v-model="queryConditions.point_id" placeholder="如：监测点001" />
+    <!-- 页面标题区域 -->
+    <div class="page-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h1 class="page-title">
+            <span class="title-icon">🔍</span>
+            高级查询
+          </h1>
+          <p class="page-subtitle">智能水质数据检索与分析</p>
+        </div>
+        <div class="header-stats">
+          <div class="stat-card">
+            <div class="stat-number">{{ stats.normal }}</div>
+            <div class="stat-label">正常</div>
           </div>
-          <div class="form-group">
-            <label>日期范围</label>
-            <div class="date-range">
-              <input type="date" v-model="queryConditions.date_start" />
-              <span>至</span>
-              <input type="date" v-model="queryConditions.date_end" />
-            </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ stats.warning }}</div>
+            <div class="stat-label">警告</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ stats.danger }}</div>
+            <div class="stat-label">超标</div>
           </div>
         </div>
-      </div>
-      
-      <div class="form-section">
-        <h3>指标阈值</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label>余氯 (mg/L)</label>
-            <div class="range-input">
-              <input type="number" step="0.1" v-model="queryConditions.chlorine_min" placeholder="最小值" />
-              <span>-</span>
-              <input type="number" step="0.1" v-model="queryConditions.chlorine_max" placeholder="最大值" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>电导率 (µS/cm)</label>
-            <div class="range-input">
-              <input type="number" step="0.1" v-model="queryConditions.conductivity_min" placeholder="最小值" />
-              <span>-</span>
-              <input type="number" step="0.1" v-model="queryConditions.conductivity_max" placeholder="最大值" />
-            </div>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>pH值</label>
-            <div class="range-input">
-              <input type="number" step="0.1" v-model="queryConditions.ph_min" placeholder="最小值" />
-              <span>-</span>
-              <input type="number" step="0.1" v-model="queryConditions.ph_max" placeholder="最大值" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>氧化还原电位 (mV)</label>
-            <div class="range-input">
-              <input type="number" step="0.1" v-model="queryConditions.orp_min" placeholder="最小值" />
-              <span>-</span>
-              <input type="number" step="0.1" v-model="queryConditions.orp_max" placeholder="最大值" />
-            </div>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>浊度 (NTU)</label>
-            <div class="range-input">
-              <input type="number" step="0.1" v-model="queryConditions.turbidity_min" placeholder="最小值" />
-              <span>-</span>
-              <input type="number" step="0.1" v-model="queryConditions.turbidity_max" placeholder="最大值" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>超标状态</label>
-            <select v-model="queryConditions.alert_status">
-              <option value="">全部</option>
-              <option value="normal">正常</option>
-              <option value="warning">警告</option>
-              <option value="danger">超标</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      
-      <div class="form-actions">
-        <button class="btn-primary" @click="executeQuery">🔍 查询</button>
-        <button class="btn-default" @click="resetQuery">🔄 重置</button>
-        <button class="btn-success" @click="exportQueryResults">📥 导出结果</button>
       </div>
     </div>
-    
-    <!-- 查询结果 -->
+
+    <!-- 查询表单区域 -->
+    <div class="query-container">
+      <div class="query-card">
+        <div class="card-header">
+          <div class="header-icon">📍</div>
+          <h2 class="card-title">基本查询条件</h2>
+        </div>
+        
+        <div class="card-content">
+          <div class="form-grid">
+            <div class="form-item">
+              <label class="form-label">
+                <span class="label-icon">🏷️</span>
+                监测点
+              </label>
+              <div class="input-wrapper">
+                <input 
+                  type="text" 
+                  v-model="queryConditions.point_id" 
+                  placeholder="输入监测点编号，如：监测点001" 
+                  class="form-input"
+                />
+              </div>
+            </div>
+            
+            <div class="form-item">
+              <label class="form-label">
+                <span class="label-icon">📅</span>
+                日期范围
+              </label>
+              <div class="date-range-wrapper">
+                <div class="input-group">
+                  <input 
+                    type="date" 
+                    v-model="queryConditions.date_start" 
+                    class="form-input"
+                  />
+                  <span class="date-separator">至</span>
+                  <input 
+                    type="date" 
+                    v-model="queryConditions.date_end" 
+                    class="form-input"
+                  />
+                </div>
+                <div class="quick-actions">
+                  <button 
+                    v-for="range in dateRanges" 
+                    :key="range.value"
+                    class="quick-btn"
+                    @click="setDateRange(range.value)"
+                  >
+                    {{ range.label }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="query-card">
+        <div class="card-header">
+          <div class="header-icon">⚗️</div>
+          <h2 class="card-title">指标阈值查询</h2>
+        </div>
+        
+        <div class="card-content">
+          <div class="indicators-grid">
+            <div 
+              v-for="indicator in indicators" 
+              :key="indicator.key"
+              class="indicator-item"
+            >
+              <div class="indicator-header">
+                <div class="indicator-icon">{{ indicator.icon }}</div>
+                <div class="indicator-info">
+                  <h3 class="indicator-name">{{ indicator.name }}</h3>
+                  <p class="indicator-unit">{{ indicator.unit }}</p>
+                </div>
+                <div class="indicator-status" :class="getRangeStatus(indicator.key)">
+                  {{ getRangeStatusText(indicator.key) }}
+                </div>
+              </div>
+              
+              <div class="range-input-group">
+                <div class="input-group">
+                  <input 
+                    type="number" 
+                    :step="indicator.step"
+                    v-model="queryConditions[`${indicator.key}_min`]" 
+                    placeholder="最小值"
+                    class="range-input"
+                  />
+                  <span class="range-separator">—</span>
+                  <input 
+                    type="number" 
+                    :step="indicator.step"
+                    v-model="queryConditions[`${indicator.key}_max`]" 
+                    placeholder="最大值"
+                    class="range-input"
+                  />
+                </div>
+                <div class="range-info">
+                  <span class="normal-range">{{ indicator.normalRange }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快速模板 -->
+      <div class="query-card">
+        <div class="card-header">
+          <div class="header-icon">⚡</div>
+          <h2 class="card-title">快速查询模板</h2>
+        </div>
+        
+        <div class="card-content">
+          <div class="templates-grid">
+            <div 
+              v-for="template in queryTemplates" 
+              :key="template.key"
+              class="template-item"
+              @click="applyTemplate(template.key)"
+            >
+              <div class="template-icon">{{ template.icon }}</div>
+              <div class="template-content">
+                <h4 class="template-title">{{ template.title }}</h4>
+                <p class="template-desc">{{ template.desc }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作按钮区域 -->
+    <div class="actions-section">
+      <div class="actions-container">
+        <button 
+          class="action-btn primary" 
+          @click="executeQuery" 
+          :disabled="loading"
+        >
+          <span v-if="loading" class="loading-spinner"></span>
+          {{ loading ? '查询中...' : '开始查询' }}
+        </button>
+        <button class="action-btn secondary" @click="resetQuery">
+          重置条件
+        </button>
+        <button 
+          class="action-btn success" 
+          @click="exportQueryResults" 
+          :disabled="queryResults.length === 0"
+        >
+          导出数据
+        </button>
+      </div>
+    </div>
+
     <div class="results-section" v-if="queryResults.length > 0">
       <div class="results-header">
         <h3>查询结果 ({{ queryResults.length }} 条)</h3>
@@ -105,7 +204,6 @@
             <tr>
               <th>ID</th>
               <th>监测点</th>
-              <th>日期</th>
               <th>时间</th>
               <th>余氯</th>
               <th>电导率</th>
@@ -117,11 +215,10 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="record in queryResults" :key="record.record_id || record.id" :class="{ 'warning': record.status === 'warning', 'danger': record.status === 'danger' }">
-              <td>{{ record.record_id || record.id }}</td>
+            <tr v-for="record in queryResults" :key="record.id" :class="record.status">
+              <td>{{ record.id }}</td>
               <td>{{ record.point_id }}</td>
-              <td>{{ record.date }}</td>
-              <td>{{ record.time }}</td>
+              <td>{{ record.date }} {{ record.time }}</td>
               <td>{{ record.chlorine }}</td>
               <td>{{ record.conductivity }}</td>
               <td>{{ record.ph }}</td>
@@ -133,7 +230,7 @@
                 </span>
               </td>
               <td>
-                <button class="btn-sm" @click="viewRecord(record)">👁️</button>
+                <button class="btn-sm" @click="viewRecord(record)">查看详情</button>
               </td>
             </tr>
           </tbody>
@@ -141,64 +238,33 @@
       </div>
     </div>
     
-    <!-- 无结果提示 -->
-    <div class="no-results" v-else-if="hasQueried">
+    <div class="no-results" v-else-if="hasQueried && !loading">
       <p>😔 没有找到符合条件的记录</p>
-      <button class="btn-default" @click="resetQuery">重新查询</button>
+      <button class="btn-default" @click="resetQuery">清空条件</button>
     </div>
-    
-    <!-- 记录详情对话框 -->
+
     <div v-if="showRecordDetail" class="modal-overlay" @click="showRecordDetail = false">
       <div class="modal" @click.stop>
         <div class="modal-header">
-          <h3>记录详情</h3>
+          <h3>数据详情记录</h3>
           <button class="close-btn" @click="showRecordDetail = false">✕</button>
         </div>
         <div class="modal-body">
-          <div class="detail-grid">
-            <div class="detail-item">
-              <label>记录ID:</label>
-              <span>{{ selectedRecord.record_id || selectedRecord.id }}</span>
+            <div class="detail-grid">
+                <div class="detail-item"><label>监测点:</label><span>{{ selectedRecord.point_id }}</span></div>
+                <div class="detail-item"><label>采样时间:</label><span>{{ selectedRecord.date }} {{ selectedRecord.time }}</span></div>
+                <div class="detail-item"><label>余氯:</label><span>{{ selectedRecord.chlorine }} mg/L</span></div>
+                <div class="detail-item"><label>电导率:</label><span>{{ selectedRecord.conductivity }} µS/cm</span></div>
+                <div class="detail-item"><label>pH值:</label><span>{{ selectedRecord.ph }}</span></div>
+                <div class="detail-item"><label>ORP:</label><span>{{ selectedRecord.orp }} mV</span></div>
+                <div class="detail-item"><label>浊度:</label><span>{{ selectedRecord.turbidity }} NTU</span></div>
+                <div class="detail-item">
+                    <label>判定状态:</label>
+                    <span class="status-badge" :class="selectedRecord.status">
+                        {{ selectedRecord.status === 'normal' ? '正常' : selectedRecord.status === 'warning' ? '警告' : '超标' }}
+                    </span>
+                </div>
             </div>
-            <div class="detail-item">
-              <label>监测点:</label>
-              <span>{{ selectedRecord.point_id }}</span>
-            </div>
-            <div class="detail-item">
-              <label>日期:</label>
-              <span>{{ selectedRecord.date }}</span>
-            </div>
-            <div class="detail-item">
-              <label>时间:</label>
-              <span>{{ selectedRecord.time }}</span>
-            </div>
-            <div class="detail-item">
-              <label>余氯:</label>
-              <span>{{ selectedRecord.chlorine }} mg/L</span>
-            </div>
-            <div class="detail-item">
-              <label>电导率:</label>
-              <span>{{ selectedRecord.conductivity }} µS/cm</span>
-            </div>
-            <div class="detail-item">
-              <label>pH值:</label>
-              <span>{{ selectedRecord.ph }}</span>
-            </div>
-            <div class="detail-item">
-              <label>ORP:</label>
-              <span>{{ selectedRecord.orp }} mV</span>
-            </div>
-            <div class="detail-item">
-              <label>浊度:</label>
-              <span>{{ selectedRecord.turbidity }} NTU</span>
-            </div>
-            <div class="detail-item">
-              <label>状态:</label>
-              <span class="status-badge" :class="selectedRecord.status">
-                {{ selectedRecord.status === 'normal' ? '正常' : selectedRecord.status === 'warning' ? '警告' : '超标' }}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -206,11 +272,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { waterQualityApi } from '@/api/waterQuality'
 
 const queryResults = ref([])
 const hasQueried = ref(false)
+const loading = ref(false)
 const showRecordDetail = ref(false)
 const selectedRecord = ref({})
 
@@ -227,11 +294,83 @@ const queryConditions = ref({
   orp_min: '',
   orp_max: '',
   turbidity_min: '',
-  turbidity_max: '',
-  alert_status: ''
+  turbidity_max: ''
 })
 
-// 报警阈值配置
+// 日期范围选项
+const dateRanges = ref([
+  { label: '今天', value: 'today' },
+  { label: '昨天', value: 'yesterday' },
+  { label: '本周', value: 'week' },
+  { label: '本月', value: 'month' }
+])
+
+// 水质指标配置
+const indicators = ref([
+  {
+    key: 'chlorine',
+    name: '余氯',
+    unit: 'mg/L',
+    icon: '🧪',
+    step: '0.1',
+    normalRange: '正常范围: 0.5-4.0'
+  },
+  {
+    key: 'conductivity',
+    name: '电导率',
+    unit: 'µS/cm',
+    icon: '⚡',
+    step: '0.1',
+    normalRange: '正常范围: ≤1000'
+  },
+  {
+    key: 'ph',
+    name: 'pH值',
+    unit: '',
+    icon: '💧',
+    step: '0.1',
+    normalRange: '正常范围: 6.5-8.5'
+  },
+  {
+    key: 'orp',
+    name: 'ORP',
+    unit: 'mV',
+    icon: '🔋',
+    step: '0.1',
+    normalRange: '正常范围: ≥400'
+  },
+  {
+    key: 'turbidity',
+    name: '浊度',
+    unit: 'NTU',
+    icon: '🌊',
+    step: '0.1',
+    normalRange: '正常范围: ≤5.0'
+  }
+])
+
+// 查询模板
+const queryTemplates = ref([
+  {
+    key: 'normal',
+    title: '正常数据',
+    desc: '查询所有正常范围内的数据',
+    icon: '✅'
+  },
+  {
+    key: 'warning',
+    title: '异常警告',
+    desc: '查询处于临界值的数据',
+    icon: '⚠️'
+  },
+  {
+    key: 'danger',
+    title: '严重超标',
+    desc: '查询所有严重超标记录',
+    icon: '🚨'
+  }
+])
+
 const alertThresholds = {
   chlorine: { min: 0.5, max: 4.0 },
   conductivity: { max: 1000 },
@@ -240,43 +379,37 @@ const alertThresholds = {
   turbidity: { max: 5.0 }
 }
 
-// 计算统计信息
 const stats = computed(() => {
-  const normal = queryResults.value.filter(r => r.status === 'normal').length
-  const warning = queryResults.value.filter(r => r.status === 'warning').length
-  const danger = queryResults.value.filter(r => r.status === 'danger').length
-  return { normal, warning, danger }
+  const res = { normal: 0, warning: 0, danger: 0 }
+  queryResults.value.forEach(r => res[r.status]++)
+  return res
 })
 
-// 检查记录状态
+// 优化后的状态检查逻辑
 const checkRecordStatus = (record) => {
-  const alerts = []
+  let severity = 0 // 0:正常, 1:警告, 2:严重
   
-  // 检查各项指标
   for (const [field, threshold] of Object.entries(alertThresholds)) {
-    const value = record[field]
-    if (value === undefined || value === null) continue
-    
-    if (threshold.min !== undefined && value < threshold.min) {
-      alerts.push(`${field}偏低`)
+    const val = parseFloat(record[field])
+    if (isNaN(val)) continue
+
+    // 严重超标逻辑：超出范围 20% 以上定义为 danger
+    if (threshold.min !== undefined) {
+      if (val < threshold.min * 0.8) severity = Math.max(severity, 2)
+      else if (val < threshold.min) severity = Math.max(severity, 1)
     }
-    if (threshold.max !== undefined && value > threshold.max) {
-      alerts.push(`${field}偏高`)
+    if (threshold.max !== undefined) {
+      if (val > threshold.max * 1.2) severity = Math.max(severity, 2)
+      else if (val > threshold.max) severity = Math.max(severity, 1)
     }
   }
   
-  if (alerts.length === 0) return 'normal'
-  if (alerts.some(alert => alert.includes('偏高'))) {
-    return alerts.length > 1 ? 'danger' : 'warning'
-  }
-  return 'warning'
+  return severity === 2 ? 'danger' : (severity === 1 ? 'warning' : 'normal')
 }
 
-// 执行查询
 const executeQuery = async () => {
+  loading.value = true
   try {
-    console.log('执行查询，条件:', queryConditions.value)
-    
     // 构建查询参数
     const queryParams = {}
     
@@ -323,439 +456,659 @@ const executeQuery = async () => {
       queryParams.turbidity_max = parseFloat(queryConditions.value.turbidity_max)
     }
     
-    // 先获取所有数据，然后在前端进行过滤
-    const response = await waterQualityApi.getRecords()
+    // 调用真实API
+    const response = await waterQualityApi.getRecords(queryParams)
     let allRecords = response.results || response
     
-    // 应用过滤条件
-    let filteredRecords = allRecords.filter(record => {
-      // 监测点过滤
-      if (queryParams.point_id && !record.point_id.includes(queryParams.point_id)) {
-        return false
-      }
-      
-      // 日期范围过滤
-      if (queryParams.date_start && record.date < queryParams.date_start) {
-        return false
-      }
-      if (queryParams.date_end && record.date > queryParams.date_end) {
-        return false
-      }
-      
-      // 指标阈值过滤
-      if (queryParams.chlorine_min && record.chlorine < queryParams.chlorine_min) {
-        return false
-      }
-      if (queryParams.chlorine_max && record.chlorine > queryParams.chlorine_max) {
-        return false
-      }
-      if (queryParams.conductivity_min && record.conductivity < queryParams.conductivity_min) {
-        return false
-      }
-      if (queryParams.conductivity_max && record.conductivity > queryParams.conductivity_max) {
-        return false
-      }
-      if (queryParams.ph_min && record.ph < queryParams.ph_min) {
-        return false
-      }
-      if (queryParams.ph_max && record.ph > queryParams.ph_max) {
-        return false
-      }
-      if (queryParams.orp_min && record.orp < queryParams.orp_min) {
-        return false
-      }
-      if (queryParams.orp_max && record.orp > queryParams.orp_max) {
-        return false
-      }
-      if (queryParams.turbidity_min && record.turbidity < queryParams.turbidity_min) {
-        return false
-      }
-      if (queryParams.turbidity_max && record.turbidity > queryParams.turbidity_max) {
-        return false
-      }
-      
-      return true
-    })
-    
     // 添加状态检查
-    filteredRecords = filteredRecords.map(record => ({
+    const filteredRecords = allRecords.map(record => ({
       ...record,
       status: checkRecordStatus(record)
     }))
     
-    // 状态过滤
-    if (queryConditions.value.alert_status) {
-      filteredRecords = filteredRecords.filter(record => record.status === queryConditions.value.alert_status)
-    }
-    
     queryResults.value = filteredRecords
     hasQueried.value = true
-    
-    console.log(`查询完成，找到 ${queryResults.value.length} 条记录`)
-    
-  } catch (error) {
-    console.error('查询失败:', error)
-    alert('查询失败，请重试')
+  } catch (e) {
+    alert('查询失败')
+  } finally {
+    loading.value = false
   }
 }
 
-// 重置查询
 const resetQuery = () => {
-  queryConditions.value = {
-    point_id: '',
-    date_start: '',
-    date_end: '',
-    chlorine_min: '',
-    chlorine_max: '',
-    conductivity_min: '',
-    conductivity_max: '',
-    ph_min: '',
-    ph_max: '',
-    orp_min: '',
-    orp_max: '',
-    turbidity_min: '',
-    turbidity_max: '',
-    alert_status: ''
-  }
+  Object.keys(queryConditions.value).forEach(k => queryConditions.value[k] = '')
   queryResults.value = []
   hasQueried.value = false
 }
 
-// 查看记录详情
-const viewRecord = (record) => {
-  selectedRecord.value = record
+const getRangeStatus = (field) => {
+  const min = queryConditions.value[`${field}_min`]
+  const max = queryConditions.value[`${field}_max`]
+  if (min === '' && max === '') return ''
+  
+  const t = alertThresholds[field]
+  if ((t.min && min < t.min) || (t.max && max > t.max)) return 'warning'
+  return 'normal'
+}
+
+const getRangeStatusText = (field) => {
+  const status = getRangeStatus(field)
+  return status === 'normal' ? '符合标准' : '范围超标'
+}
+
+const setDateRange = (range) => {
+  const now = new Date()
+  const format = (d) => d.toISOString().split('T')[0]
+  queryConditions.value.date_end = format(now)
+  
+  if (range === 'today') queryConditions.value.date_start = format(now)
+  if (range === 'yesterday') {
+    const d = new Date(); d.setDate(d.getDate() - 1)
+    queryConditions.value.date_start = format(d)
+    queryConditions.value.date_end = format(d)
+  }
+  if (range === 'week') {
+    const d = new Date(); d.setDate(d.getDate() - 7)
+    queryConditions.value.date_start = format(d)
+  }
+  if (range === 'month') {
+    const d = new Date(); d.setMonth(d.getMonth() - 1)
+    queryConditions.value.date_start = format(d)
+  }
+}
+
+const applyTemplate = (type) => {
+  resetQuery()
+  if (type === 'normal') {
+    queryConditions.value.chlorine_min = 0.5
+    queryConditions.value.chlorine_max = 4.0
+    queryConditions.value.ph_min = 6.5
+    queryConditions.value.ph_max = 8.5
+  } else if (type === 'danger') {
+    queryConditions.value.turbidity_min = 5.1
+    queryConditions.value.ph_max = 6.0
+  }
+}
+
+const viewRecord = (r) => {
+  selectedRecord.value = r
   showRecordDetail.value = true
 }
 
-// 导出查询结果
 const exportQueryResults = () => {
-  if (queryResults.value.length === 0) {
-    alert('没有可导出的数据')
-    return
-  }
-  
-  const csv = [
-    'ID,监测点,日期,时间,余氯,电导率,pH值,ORP,浊度,状态',
-    ...queryResults.value.map(record => 
-      `${record.record_id || record.id},${record.point_id},${record.date},${record.time},${record.chlorine},${record.conductivity},${record.ph},${record.orp},${record.turbidity},${record.status === 'normal' ? '正常' : record.status === 'warning' ? '警告' : '超标'}`
-    )
-  ].join('\n')
-  
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(blob)
-  link.download = `query_results_${new Date().toISOString().split('T')[0]}.csv`
-  link.click()
-  
-  alert(`已导出 ${queryResults.value.length} 条记录`)
+    // 简单 CSV 导出逻辑
+    const headers = "ID,点位,日期,余氯,电导率,pH,状态\n";
+    const rows = queryResults.value.map(r => `${r.id},${r.point_id},${r.date},${r.chlorine},${r.conductivity},${r.ph},${r.status}`).join("\n");
+    const blob = new Blob(["\ufeff" + headers + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "水质导出.csv");
+    link.click();
 }
-
-onMounted(() => {
-  console.log('查询页面加载完成')
-})
 </script>
 
 <style scoped>
+/* ===== 全局样式 ===== */
 .query-page {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
 }
 
-.query-form {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.form-section {
-  margin-bottom: 25px;
-}
-
-.form-section h3 {
-  margin: 0 0 15px 0;
-  color: #333;
-  border-bottom: 2px solid #409EFF;
-  padding-bottom: 5px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group label {
-  margin-bottom: 5px;
-  font-weight: 600;
-  color: #333;
-}
-
-.form-group input,
-.form-group select {
-  padding: 8px 12px;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.date-range {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.date-range input {
-  flex: 1;
-}
-
-.range-input {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.range-input input {
-  flex: 1;
-}
-
-.range-input span {
-  color: #666;
-}
-
-.form-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  padding-top: 20px;
-  border-top: 1px solid #e6e6e6;
-}
-
-.btn-primary, .btn-default, .btn-success {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+/* ===== 页面头部 ===== */
+.page-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
   color: white;
 }
 
-.btn-primary { background: #409EFF; }
-.btn-default { background: #909399; }
-.btn-success { background: #67C23A; }
-
-.results-section {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.results-header {
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 30px;
 }
 
-.results-header h3 {
-  margin: 0;
-  color: #333;
+.title-section {
+  flex: 1;
 }
 
-.results-stats {
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
   display: flex;
+  align-items: center;
   gap: 15px;
 }
 
-.stat-item {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
+.title-icon {
+  font-size: 2.2rem;
+  animation: pulse 2s infinite;
 }
 
-.stat-item.normal { background: #f0f9ff; color: #409EFF; }
-.stat-item.warning { background: #fdf6ec; color: #E6A23C; }
-.stat-item.danger { background: #fef0f0; color: #F56C6C; }
-
-.table-container {
-  overflow-x: auto;
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+.page-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
+  font-weight: 300;
 }
 
-.data-table th,
-.data-table td {
-  padding: 12px 8px;
+.header-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 20px;
   text-align: center;
-  border: 1px solid #e6e6e6;
+  min-width: 100px;
+  transition: all 0.3s ease;
 }
 
-.data-table th {
-  background: #f5f7fa;
-  font-weight: 600;
-  color: #333;
+.stat-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.25);
 }
 
-.data-table tbody tr:hover {
-  background: #f5f7fa;
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 5px;
 }
 
-.data-table tbody tr.warning {
-  background: #fdf6ec;
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.data-table tbody tr.danger {
-  background: #fef0f0;
+/* ===== 查询容器 ===== */
+.query-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 25px;
+  margin-bottom: 30px;
 }
 
-.status-badge {
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
+.query-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-.status-badge.normal {
-  background: #f0f9ff;
-  color: #409EFF;
+.query-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
-.status-badge.warning {
-  background: #fdf6ec;
-  color: #E6A23C;
-}
-
-.status-badge.danger {
-  background: #fef0f0;
-  color: #F56C6C;
-}
-
-.btn-sm {
-  padding: 4px 8px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  background: #409EFF;
+.card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  font-size: 12px;
+  padding: 25px 30px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.no-results {
-  text-align: center;
-  padding: 40px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.no-results p {
-  margin: 0 0 20px 0;
-  color: #666;
-  font-size: 16px;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
+.header-icon {
+  font-size: 1.8rem;
+  background: rgba(255, 255, 255, 0.2);
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
 }
 
-.modal {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  max-width: 600px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e6e6e6;
-}
-
-.modal-header h3 {
+.card-title {
+  font-size: 1.3rem;
+  font-weight: 600;
   margin: 0;
-  color: #333;
 }
 
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #666;
+.card-content {
+  padding: 30px;
 }
 
-.detail-grid {
+/* ===== 表单样式 ===== */
+.form-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+.form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.label-icon {
+  font-size: 1.2rem;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid #e1e8ed;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ===== 日期范围 ===== */
+.date-range-wrapper {
+  display: flex;
+  flex-direction: column;
   gap: 15px;
 }
 
-.detail-item {
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.date-separator {
+  color: #666;
+  font-weight: 500;
+  padding: 0 10px;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.quick-btn {
+  padding: 8px 16px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  background: white;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.quick-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+  background: #f0f4ff;
+  transform: translateY(-2px);
+}
+
+/* ===== 指标网格 ===== */
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 25px;
+}
+
+.indicator-item {
+  border: 2px solid #e1e8ed;
+  border-radius: 15px;
+  padding: 25px;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+}
+
+.indicator-item:hover {
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+}
+
+.indicator-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.indicator-icon {
+  font-size: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 60px;
+  height: 60px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.indicator-info {
+  flex: 1;
+}
+
+.indicator-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.indicator-unit {
+  color: #666;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.indicator-status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.indicator-status.normal {
+  background: #d4edda;
+  color: #155724;
+}
+
+.indicator-status.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.indicator-status.danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.range-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.range-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid #e1e8ed;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.range-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.range-separator {
+  color: #666;
+  font-weight: 500;
+  padding: 0 10px;
   display: flex;
   align-items: center;
 }
 
-.detail-item label {
-  font-weight: 600;
-  color: #333;
-  min-width: 80px;
-  margin-right: 10px;
-}
-
-.detail-item span {
+.range-info {
+  font-size: 0.85rem;
   color: #666;
+  padding: 8px 12px;
+  background: #f0f4ff;
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
 }
 
-/* 深色主题 */
-.dark .query-page .query-form,
-.dark .query-page .results-section,
-.dark .query-page .no-results,
-.dark .query-page .modal {
-  background: #1f1f1f;
-  color: #fff;
+/* ===== 模板网格 ===== */
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
 }
 
-.dark .query-page .form-group input,
-.dark .query-page .form-group select {
-  background: #2a2a2a;
-  border-color: #4c4d4f;
-  color: #fff;
+.template-item {
+  border: 2px solid #e1e8ed;
+  border-radius: 15px;
+  padding: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
-.dark .query-page .data-table th {
-  background: #2a2a2a;
-  color: #fff;
+.template-item:hover {
+  border-color: #667eea;
+  background: white;
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.2);
 }
 
-.dark .query-page .data-table tbody tr:hover {
-  background: #2a2a2a;
+.template-icon {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 70px;
+  height: 70px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.template-content {
+  flex: 1;
+}
+
+.template-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.template-desc {
+  color: #666;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* ===== 操作按钮 ===== */
+.actions-section {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.actions-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 150px;
+  justify-content: center;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.action-btn.primary:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.action-btn.secondary {
+  background: #f8fafc;
+  color: #666;
+  border: 2px solid #e1e8ed;
+}
+
+.action-btn.secondary:hover {
+  border-color: #667eea;
+  color: #667eea;
+  background: #f0f4ff;
+}
+
+.action-btn.success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.action-btn.success:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== 响应式设计 ===== */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .header-stats {
+    justify-content: center;
+  }
+  
+  .form-grid,
+  .indicators-grid,
+  .templates-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .actions-container {
+    flex-direction: column;
+  }
+  
+  .action-btn {
+    width: 100%;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .input-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .quick-actions {
+    justify-content: center;
+  }
+}
+
+/* ===== 深色主题 ===== */
+@media (prefers-color-scheme: dark) {
+  .query-page {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+  
+  .query-card,
+  .actions-section {
+    background: #1e1e2e;
+    color: white;
+  }
+  
+  .form-input {
+    background: #2a2a3e;
+    border-color: #3a3a4e;
+    color: white;
+  }
+  
+  .form-input:focus {
+    background: #2a2a3e;
+  }
+  
+  .indicator-item,
+  .template-item {
+    background: #2a2a3e;
+    border-color: #3a3a4e;
+  }
+  
+  .indicator-item:hover,
+  .template-item:hover {
+    background: #1e1e2e;
+  }
 }
 </style>

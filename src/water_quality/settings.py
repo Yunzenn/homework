@@ -76,7 +76,8 @@ WSGI_APPLICATION = 'water_quality.wsgi.application'
 
 
 # Database
-# Using file storage instead of database
+# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

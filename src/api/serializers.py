@@ -1,44 +1,14 @@
 from rest_framework import serializers
-from .models import WaterQualityRecord, AlertThreshold
-from .file_storage import FileStorageService
+from .models import WaterQualityRecord
 
 
-class WaterQualityRecordSerializer(serializers.Serializer):
+class WaterQualityRecordSerializer(serializers.ModelSerializer):
     """水质记录序列化器"""
-    record_id = serializers.IntegerField(read_only=True)
-    point_id = serializers.CharField(max_length=50, error_messages={
-        'required': '监测点ID不能为空',
-        'blank': '监测点ID不能为空'
-    })
-    date = serializers.DateField(error_messages={
-        'required': '日期不能为空',
-        'invalid': '日期格式错误，请使用YYYY-MM-DD格式'
-    })
-    time = serializers.TimeField(error_messages={
-        'required': '时间不能为空',
-        'invalid': '时间格式错误，请使用HH:MM格式'
-    }, input_formats=['%H:%M:%S', '%H:%M'])
-    chlorine = serializers.FloatField(min_value=0, error_messages={
-        'required': '余氯值不能为空',
-        'min_value': '余氯值不能为负数'
-    })
-    conductivity = serializers.FloatField(min_value=0, error_messages={
-        'required': '电导率不能为空',
-        'min_value': '电导率不能为负数'
-    })
-    ph = serializers.FloatField(min_value=0, max_value=14, error_messages={
-        'required': 'pH值不能为空',
-        'min_value': 'pH值不能小于0',
-        'max_value': 'pH值不能大于14'
-    })
-    orp = serializers.FloatField(error_messages={
-        'required': '氧化还原电位不能为空'
-    })
-    turbidity = serializers.FloatField(min_value=0, error_messages={
-        'required': '浊度不能为空',
-        'min_value': '浊度不能为负数'
-    })
-    create_time = serializers.DateTimeField(read_only=True, format='%Y-%m-%d %H:%M:%S')
+    
+    class Meta:
+        model = WaterQualityRecord
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at')
     
     def validate_point_id(self, value):
         """验证监测点ID"""
@@ -46,23 +16,50 @@ class WaterQualityRecordSerializer(serializers.Serializer):
             raise serializers.ValidationError('监测点ID不能为空')
         return value.strip()
     
-    def validate(self, attrs):
-        """交叉验证"""
-        # 可以在这里添加更复杂的验证逻辑
-        return attrs
+    def validate_chlorine(self, value):
+        """验证余氯值"""
+        if value is not None and value < 0:
+            raise serializers.ValidationError('余氯值不能为负数')
+        return value
     
-    def create(self, validated_data):
-        """创建记录"""
-        storage = FileStorageService()
-        record = storage.insert(validated_data)
-        return record
+    def validate_conductivity(self, value):
+        """验证电导率"""
+        if value is not None and value < 0:
+            raise serializers.ValidationError('电导率不能为负数')
+        return value
     
-    def update(self, instance, validated_data):
-        """更新记录"""
-        storage = FileStorageService()
-        record_id = instance.get('record_id')
-        updated_record = storage.update(record_id, validated_data)
-        return updated_record
+    def validate_ph(self, value):
+        """验证pH值"""
+        if value is not None and not (0 <= value <= 14):
+            raise serializers.ValidationError('pH值必须在0-14之间')
+        return value
+    
+    def validate_orp(self, value):
+        """验证ORP值"""
+        return value
+    
+    def validate_turbidity(self, value):
+        """验证浊度"""
+        if value is not None and value < 0:
+            raise serializers.ValidationError('浊度不能为负数')
+        return value
+    
+    def to_representation(self, instance):
+        """自定义输出格式"""
+        data = super().to_representation(instance)
+        
+        # 添加报警状态
+        alert_info = instance.is_alert
+        data['status'] = alert_info['alert_level']
+        data['alert_items'] = alert_info['alert_items']
+        
+        # 格式化日期时间
+        if instance.date:
+            data['date'] = instance.date.strftime('%Y-%m-%d')
+        if instance.time:
+            data['time'] = instance.time.strftime('%H:%M')
+        
+        return data
 
 
 class QueryFilterSerializer(serializers.Serializer):
@@ -80,7 +77,7 @@ class QueryFilterSerializer(serializers.Serializer):
     orp_max = serializers.FloatField(required=False)
     turbidity_min = serializers.FloatField(required=False, min_value=0)
     turbidity_max = serializers.FloatField(required=False, min_value=0)
-    sort_by = serializers.CharField(required=False, allow_blank=True)
+    sort_by = serializers.CharField(required=False)
     sort_desc = serializers.BooleanField(required=False, default=False)
     
     def validate(self, attrs):

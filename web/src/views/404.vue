@@ -48,38 +48,38 @@ const goBack = () => {
   align-items: center;
   justify-content: center;
   background-color: var(--el-bg-color-page);
-  padding: $spacing-lg;
+  padding: 24px;
   
   .not-found-content {
     text-align: center;
-    margin-right: $spacing-xl;
+    margin-right: 48px;
     
     .error-code {
       font-size: 120px;
       font-weight: 700;
       color: var(--el-color-primary);
       line-height: 1;
-      margin-bottom: $spacing-lg;
+      margin-bottom: 24px;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     }
     
     .error-message {
-      font-size: $font-size-extra-large;
+      font-size: 32px;
       font-weight: 600;
       color: var(--el-text-color-primary);
-      margin-bottom: $spacing-md;
+      margin-bottom: 16px;
     }
     
     .error-description {
-      font-size: $font-size-base;
+      font-size: 16px;
       color: var(--el-text-color-regular);
-      margin-bottom: $spacing-xl;
+      margin-bottom: 48px;
       max-width: 400px;
     }
     
     .error-actions {
       display: flex;
-      gap: $spacing-md;
+      gap: 16px;
       justify-content: center;
     }
   }
@@ -90,14 +90,14 @@ const goBack = () => {
 }
 
 // 响应式设计
-@include respond-to(md) {
+@media (min-width: 768px) {
   .not-found-container {
     flex-direction: column;
     text-align: center;
     
     .not-found-content {
       margin-right: 0;
-      margin-bottom: $spacing-lg;
+      margin-bottom: 24px;
     }
   }
 }
