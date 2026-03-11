@@ -29,6 +29,14 @@
             <span class="icon">📝</span>
             <span class="text" v-show="!sidebarCollapsed">数据管理</span>
           </a>
+          <a href="#" class="menu-item" :class="{ active: currentPath === '/test-form' }" @click="navigate('/test-form')">
+            <span class="icon">🧪</span>
+            <span class="text" v-show="!sidebarCollapsed">测试表单</span>
+          </a>
+          <a href="#" class="menu-item" :class="{ active: currentPath === '/api-test' }" @click="navigate('/api-test')">
+            <span class="icon">🔧</span>
+            <span class="text" v-show="!sidebarCollapsed">API测试</span>
+          </a>
           <a href="#" class="menu-item" :class="{ active: currentPath === '/query' }" @click="navigate('/query')">
             <span class="icon">🔍</span>
             <span class="text" v-show="!sidebarCollapsed">高级查询</span>

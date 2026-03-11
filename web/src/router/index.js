@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import SimpleLayout from '@/layout/SimpleLayout.vue'
 import SimpleDashboard from '@/views/SimpleDashboard.vue'
 import SimpleRecords from '@/views/SimpleRecords.vue'
+import ApiTest from '@/views/ApiTest.vue'
+import TestForm from '@/views/TestForm.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -25,6 +27,18 @@ const router = createRouter({
           name: 'Records',
           component: SimpleRecords,
           meta: { title: '数据管理' }
+        },
+        {
+          path: '/test-form',
+          name: 'TestForm',
+          component: TestForm,
+          meta: { title: '测试表单' }
+        },
+        {
+          path: '/api-test',
+          name: 'ApiTest',
+          component: ApiTest,
+          meta: { title: 'API测试' }
         },
         {
           path: '/query',

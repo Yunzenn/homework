@@ -64,6 +64,13 @@ class FileStorageService:
         data = self._read_file()
         record['record_id'] = self._get_next_id(data)
         record['create_time'] = datetime.now().isoformat()
+        
+        # 转换datetime对象为字符串
+        if 'date' in record and hasattr(record['date'], 'isoformat'):
+            record['date'] = record['date'].isoformat()
+        if 'time' in record and hasattr(record['time'], 'isoformat'):
+            record['time'] = record['time'].isoformat()
+        
         data.append(record)
         self._write_file(data)
         return record
@@ -74,7 +81,15 @@ class FileStorageService:
         for i, item in enumerate(data):
             if item.get('record_id') == record_id:
                 update_data['record_id'] = record_id
+                # 保留原有的create_time
                 update_data['create_time'] = item.get('create_time', datetime.now().isoformat())
+                
+                # 转换datetime对象为字符串
+                if 'date' in update_data and hasattr(update_data['date'], 'isoformat'):
+                    update_data['date'] = update_data['date'].isoformat()
+                if 'time' in update_data and hasattr(update_data['time'], 'isoformat'):
+                    update_data['time'] = update_data['time'].isoformat()
+                
                 data[i] = update_data
                 self._write_file(data)
                 return update_data

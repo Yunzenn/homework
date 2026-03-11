@@ -17,7 +17,7 @@ class WaterQualityRecordSerializer(serializers.Serializer):
     time = serializers.TimeField(error_messages={
         'required': '时间不能为空',
         'invalid': '时间格式错误，请使用HH:MM格式'
-    })
+    }, input_formats=['%H:%M:%S', '%H:%M'])
     chlorine = serializers.FloatField(min_value=0, error_messages={
         'required': '余氯值不能为空',
         'min_value': '余氯值不能为负数'

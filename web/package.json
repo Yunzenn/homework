@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
-    "axios": "^1.6.2",
+    "axios": "^1.13.6",
     "countup.js": "^2.6.2",
     "dayjs": "^1.11.10",
     "echarts": "^5.4.3",

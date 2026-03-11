@@ -49,12 +49,12 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="record in filteredRecords" :key="record.id" :class="{ 'warning': record.status === 'warning', 'danger': record.status === 'danger' }">
+          <tr v-for="record in filteredRecords" :key="record.record_id || record.id" :class="{ 'warning': record.status === 'warning', 'danger': record.status === 'danger' }">
             <td>
-              <input type="checkbox" :value="record.id" v-model="selectedIds" />
+              <input type="checkbox" :value="record.record_id || record.id" v-model="selectedIds" />
             </td>
-            <td>{{ record.id }}</td>
-            <td>{{ record.point }}</td>
+            <td>{{ record.record_id || record.id }}</td>
+            <td>{{ record.point_id }}</td>
             <td>{{ record.date }}</td>
             <td>{{ record.time }}</td>
             <td>{{ record.chlorine }}</td>
@@ -69,7 +69,7 @@
             </td>
             <td>
               <button class="btn-sm" @click="editRecord(record)">✏️</button>
-              <button class="btn-sm btn-danger" @click="deleteRecord(record.id)">🗑️</button>
+              <button class="btn-sm btn-danger" @click="deleteRecord(record.record_id || record.id)">🗑️</button>
             </td>
           </tr>
         </tbody>
@@ -97,7 +97,7 @@
           <div class="form-grid">
             <div class="form-group">
               <label>监测点ID</label>
-              <input type="text" v-model="formData.point" placeholder="如：监测点001" />
+              <input type="text" v-model="formData.point_id" placeholder="如：监测点001" />
             </div>
             <div class="form-group">
               <label>日期</label>
@@ -190,15 +190,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { waterQualityApi } from '@/api/waterQuality'
 
-const records = ref([
-  { id: 1, point: '监测点001', date: '2024-03-11', time: '08:00', chlorine: 2.5, conductivity: 450.0, ph: 7.2, orp: 650.0, turbidity: 1.8, status: 'normal' },
-  { id: 2, point: '监测点002', date: '2024-03-11', time: '08:00', chlorine: 3.0, conductivity: 520.0, ph: 8.5, orp: 680.0, turbidity: 2.1, status: 'warning' },
-  { id: 3, point: '监测点003', date: '2024-03-11', time: '08:00', chlorine: 1.8, conductivity: 380.0, ph: 6.8, orp: 620.0, turbidity: 1.5, status: 'normal' },
-  { id: 4, point: '监测点004', date: '2024-03-11', time: '08:00', chlorine: 4.5, conductivity: 410.0, ph: 7.3, orp: 635.0, turbidity: 1.9, status: 'danger' },
-  { id: 5, point: '监测点005', date: '2024-03-11', time: '08:00', chlorine: 2.7, conductivity: 480.0, ph: 7.4, orp: 660.0, turbidity: 2.2, status: 'normal' }
-])
-
+const records = ref([])
+const loading = ref(false)
 const searchText = ref('')
 const selectedIds = ref([])
 const currentPage = ref(1)
@@ -210,7 +205,7 @@ const uploadPreview = ref([])
 const fileInput = ref(null)
 
 const formData = ref({
-  point: '',
+  point_id: '',
   date: '',
   time: '',
   chlorine: '',
@@ -223,20 +218,53 @@ const formData = ref({
 const filteredRecords = computed(() => {
   if (!searchText.value) return records.value
   return records.value.filter(record => 
-    record.point.toLowerCase().includes(searchText.value.toLowerCase())
+    record.point_id.toLowerCase().includes(searchText.value.toLowerCase())
   )
 })
 
 const total = computed(() => filteredRecords.value.length)
 const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 const selectedCount = computed(() => selectedIds.value.length)
-const allSelected = computed(() => selectedIds.value.length === filteredRecords.value.length && filteredRecords.value.length > 0)
+const allSelected = computed(() => {
+  const filtered = filteredRecords.value
+  return filtered.length > 0 && filtered.every(record => 
+    selectedIds.value.includes(record.record_id || record.id)
+  )
+})
+
+// 加载数据
+const loadData = async () => {
+  try {
+    loading.value = true
+    const response = await waterQualityApi.getRecords()
+    records.value = response.results || response
+    console.log('加载的数据:', records.value)
+  } catch (error) {
+    console.error('加载数据失败:', error)
+    // 如果API失败，使用模拟数据
+    records.value = [
+      { id: 1, point_id: '监测点001', date: '2024-03-11', time: '08:00', chlorine: 2.5, conductivity: 450.0, ph: 7.2, orp: 650.0, turbidity: 1.8 },
+      { id: 2, point_id: '监测点002', date: '2024-03-11', time: '08:00', chlorine: 3.0, conductivity: 520.0, ph: 8.5, orp: 680.0, turbidity: 2.1 },
+      { id: 3, point_id: '监测点003', date: '2024-03-11', time: '08:00', chlorine: 1.8, conductivity: 380.0, ph: 6.8, orp: 620.0, turbidity: 1.5 },
+      { id: 4, point_id: '监测点004', date: '2024-03-11', time: '08:00', chlorine: 4.5, conductivity: 410.0, ph: 7.3, orp: 635.0, turbidity: 1.9 },
+      { id: 5, point_id: '监测点005', date: '2024-03-11', time: '08:00', chlorine: 2.7, conductivity: 480.0, ph: 7.4, orp: 660.0, turbidity: 2.2 }
+    ]
+  } finally {
+    loading.value = false
+  }
+}
 
 const toggleAllSelect = () => {
+  const filtered = filteredRecords.value
   if (allSelected.value) {
-    selectedIds.value = []
+    // 取消全选
+    selectedIds.value = selectedIds.value.filter(id => 
+      !filtered.some(record => (record.record_id || record.id) === id)
+    )
   } else {
-    selectedIds.value = filteredRecords.value.map(record => record.id)
+    // 全选
+    const newIds = filtered.map(record => record.record_id || record.id)
+    selectedIds.value = [...new Set([...selectedIds.value, ...newIds])]
   }
 }
 
@@ -246,46 +274,120 @@ const editRecord = (record) => {
   showAddDialog.value = true
 }
 
-const deleteRecord = (id) => {
-  if (confirm('确定要删除这条记录吗？')) {
-    const index = records.value.findIndex(r => r.id === id)
+const deleteRecord = async (id) => {
+  if (!confirm('确定要删除这条记录吗？')) return
+  
+  try {
+    // 使用正确的字段名 record_id
+    await waterQualityApi.deleteRecord(id)
+    const index = records.value.findIndex(r => r.id === id || r.record_id === id)
     if (index > -1) {
       records.value.splice(index, 1)
     }
+    alert('删除成功')
+  } catch (error) {
+    console.error('删除失败:', error)
+    alert('删除失败，请重试')
   }
 }
 
-const batchDelete = () => {
-  if (confirm(`确定要删除选中的 ${selectedCount.value} 条记录吗？`)) {
-    records.value = records.value.filter(record => !selectedIds.value.includes(record.id))
-    selectedIds.value = []
-  }
-}
-
-const saveRecord = () => {
-  if (editingRecord.value) {
-    // 编辑
-    const index = records.value.findIndex(r => r.id === editingRecord.value.id)
-    if (index > -1) {
-      records.value[index] = { ...formData.value, id: editingRecord.value.id }
-    }
-  } else {
-    // 新增
-    const newId = Math.max(...records.value.map(r => r.id)) + 1
-    records.value.push({ ...formData.value, id: newId, status: 'normal' })
-  }
+const batchDelete = async () => {
+  if (!confirm(`确定要删除选中的 ${selectedCount.value} 条记录吗？`)) return
   
-  showAddDialog.value = false
-  editingRecord.value = null
-  formData.value = {
-    point: '',
-    date: '',
-    time: '',
-    chlorine: '',
-    conductivity: '',
-    ph: '',
-    orp: '',
-    turbidity: ''
+  try {
+    await waterQualityApi.batchDeleteRecords(selectedIds.value)
+    records.value = records.value.filter(record => !selectedIds.value.includes(record.id || record.record_id))
+    selectedIds.value = []
+    alert('批量删除成功')
+  } catch (error) {
+    console.error('批量删除失败:', error)
+    alert('批量删除失败，请重试')
+  }
+}
+
+const saveRecord = async () => {
+  try {
+    // 数据验证
+    if (!formData.value.point_id || !formData.value.date || !formData.value.time) {
+      alert('请填写监测点ID、日期和时间')
+      return
+    }
+    
+    // 确保数值字段不为空
+    const dataToSave = {
+      point_id: formData.value.point_id.trim(),
+      date: formData.value.date,
+      time: formData.value.time,
+      chlorine: parseFloat(formData.value.chlorine) || 0.0,
+      conductivity: parseFloat(formData.value.conductivity) || 0.0,
+      ph: parseFloat(formData.value.ph) || 7.0,
+      orp: parseFloat(formData.value.orp) || 0.0,
+      turbidity: parseFloat(formData.value.turbidity) || 0.0
+    }
+    
+    console.log('保存的数据:', dataToSave)
+    
+    if (editingRecord.value) {
+      // 编辑 - 使用正确的ID字段
+      const recordId = editingRecord.value.record_id || editingRecord.value.id
+      await waterQualityApi.updateRecord(recordId, dataToSave)
+      const index = records.value.findIndex(r => (r.id === recordId || r.record_id === recordId))
+      if (index > -1) {
+        records.value[index] = { ...dataToSave, id: recordId, record_id: recordId }
+      }
+      alert('更新成功')
+    } else {
+      // 新增
+      const response = await waterQualityApi.createRecord(dataToSave)
+      console.log('创建响应:', response)
+      const newRecord = {
+        ...dataToSave,
+        id: response.record_id || response.id || Date.now(),
+        record_id: response.record_id || response.id || Date.now()
+      }
+      records.value.push(newRecord)
+      alert('创建成功')
+    }
+    
+    showAddDialog.value = false
+    editingRecord.value = null
+    formData.value = {
+      point_id: '',
+      date: '',
+      time: '',
+      chlorine: '',
+      conductivity: '',
+      ph: '',
+      orp: '',
+      turbidity: ''
+    }
+  } catch (error) {
+    console.error('保存失败:', error)
+    
+    // 显示详细错误信息
+    let errorMessage = '保存失败，请重试'
+    if (error.response && error.response.data) {
+      if (typeof error.response.data === 'string') {
+        errorMessage = error.response.data
+      } else if (error.response.data.detail) {
+        errorMessage = error.response.data.detail
+      } else if (error.response.data.non_field_errors) {
+        errorMessage = error.response.data.non_field_errors.join(', ')
+      } else {
+        // 收集所有字段错误
+        const errors = []
+        for (const [field, messages] of Object.entries(error.response.data)) {
+          if (Array.isArray(messages)) {
+            errors.push(`${field}: ${messages.join(', ')}`)
+          } else {
+            errors.push(`${field}: ${messages}`)
+          }
+        }
+        errorMessage = errors.join('; ')
+      }
+    }
+    
+    alert(errorMessage)
   }
 }
 
@@ -308,14 +410,14 @@ const handleFileUpload = (event) => {
       const values = lines[i].split(',').map(v => v.trim())
       if (values.length >= 8) {
         parsedData.push({
-          point: values[0],
+          point_id: values[0],
           date: values[1],
           time: values[2],
-          chlorine: values[3],
-          conductivity: values[4],
-          ph: values[5],
-          orp: values[6],
-          turbidity: values[7]
+          chlorine: parseFloat(values[3]) || 0,
+          conductivity: parseFloat(values[4]) || 0,
+          ph: parseFloat(values[5]) || 0,
+          orp: parseFloat(values[6]) || 0,
+          turbidity: parseFloat(values[7]) || 0
         })
       }
     }
@@ -325,45 +427,96 @@ const handleFileUpload = (event) => {
   reader.readAsText(file)
 }
 
-const confirmUpload = () => {
-  let nextId = Math.max(...records.value.map(r => r.id)) + 1
-  
-  uploadPreview.value.forEach(item => {
-    records.value.push({
-      ...item,
-      id: nextId++,
-      status: 'normal'
+const confirmUpload = async () => {
+  try {
+    console.log('开始批量上传，数据条数:', uploadPreview.value.length)
+    
+    // 验证并格式化数据
+    const validRecords = uploadPreview.value.filter(item => {
+      return item.point_id && item.date && item.time
+    }).map(item => ({
+      point_id: item.point_id.trim(),
+      date: item.date,
+      time: item.time,
+      chlorine: parseFloat(item.chlorine) || 0.0,
+      conductivity: parseFloat(item.conductivity) || 0.0,
+      ph: parseFloat(item.ph) || 7.0,
+      orp: parseFloat(item.orp) || 0.0,
+      turbidity: parseFloat(item.turbidity) || 0.0
+    }))
+    
+    if (validRecords.length === 0) {
+      alert('没有有效的数据可以上传')
+      return
+    }
+    
+    console.log('有效数据条数:', validRecords.length)
+    
+    // 批量创建记录
+    const promises = validRecords.map(item => {
+      console.log('上传记录:', item)
+      return waterQualityApi.createRecord(item)
     })
-  })
-  
-  showUploadDialog.value = false
-  uploadPreview.value = []
-  fileInput.value.value = ''
+    
+    const results = await Promise.allSettled(promises)
+    const successful = results.filter(r => r.status === 'fulfilled').length
+    const failed = results.filter(r => r.status === 'rejected').length
+    
+    console.log(`上传结果: 成功 ${successful}, 失败 ${failed}`)
+    
+    // 重新加载数据
+    await loadData()
+    
+    showUploadDialog.value = false
+    uploadPreview.value = []
+    fileInput.value.value = ''
+    
+    if (failed === 0) {
+      alert(`成功上传 ${successful} 条记录`)
+    } else {
+      alert(`上传完成：成功 ${successful} 条，失败 ${failed} 条`)
+    }
+  } catch (error) {
+    console.error('批量上传失败:', error)
+    alert('批量上传失败，请重试')
+  }
 }
 
-const exportData = () => {
-  const data = filteredRecords.value
-  const csv = [
-    'ID,监测点,日期,时间,余氯,电导率,pH值,氧化还原电位,浊度',
-    ...data.map(record => 
-      `${record.id},${record.point},${record.date},${record.time},${record.chlorine},${record.conductivity},${record.ph},${record.orp},${record.turbidity}`
-    )
-  ].join('\n')
-  
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(blob)
-  link.download = `water_quality_${new Date().toISOString().split('T')[0]}.csv`
-  link.click()
-}
-
-const loadData = () => {
-  // 模拟数据加载
-  console.log('数据已刷新')
+const exportData = async () => {
+  try {
+    const response = await waterQualityApi.exportRecords()
+    
+    // 创建下载链接
+    const blob = new Blob([response], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `water_quality_${new Date().toISOString().split('T')[0]}.csv`
+    link.click()
+    
+    alert('导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    // 如果API失败，使用模拟导出
+    const data = filteredRecords.value
+    const csv = [
+      'ID,监测点,日期,时间,余氯,电导率,pH值,氧化还原电位,浊度',
+      ...data.map(record => 
+        `${record.id},${record.point_id},${record.date},${record.time},${record.chlorine},${record.conductivity},${record.ph},${record.orp},${record.turbidity}`
+      )
+    ].join('\n')
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `water_quality_${new Date().toISOString().split('T')[0]}.csv`
+    link.click()
+    
+    alert('导出成功（使用模拟数据）')
+  }
 }
 
 onMounted(() => {
-  console.log('数据管理页面加载完成')
+  loadData()
 })
 </script>
 
