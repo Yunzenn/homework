@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import SimpleLayout from '@/layout/SimpleLayout.vue'
 import SimpleDashboard from '@/views/SimpleDashboard.vue'
 import SimpleRecords from '@/views/SimpleRecords.vue'
+import SimpleQuery from '@/views/SimpleQuery.vue'
 import ApiTest from '@/views/ApiTest.vue'
 import TestForm from '@/views/TestForm.vue'
 
@@ -29,6 +30,12 @@ const router = createRouter({
           meta: { title: '数据管理' }
         },
         {
+          path: '/query',
+          name: 'Query',
+          component: SimpleQuery,
+          meta: { title: '高级查询' }
+        },
+        {
           path: '/test-form',
           name: 'TestForm',
           component: TestForm,
@@ -39,12 +46,6 @@ const router = createRouter({
           name: 'ApiTest',
           component: ApiTest,
           meta: { title: 'API测试' }
-        },
-        {
-          path: '/query',
-          name: 'Query',
-          component: () => import('@/views/SimpleDashboard.vue'),
-          meta: { title: '高级查询' }
         },
         {
           path: '/alerts',

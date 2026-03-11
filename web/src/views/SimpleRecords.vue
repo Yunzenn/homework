@@ -237,21 +237,65 @@ const loadData = async () => {
   try {
     loading.value = true
     const response = await waterQualityApi.getRecords()
-    records.value = response.results || response
+    const allRecords = response.results || response
+    
+    // 添加状态检查
+    records.value = allRecords.map(record => ({
+      ...record,
+      status: checkRecordStatus(record)
+    }))
+    
     console.log('加载的数据:', records.value)
   } catch (error) {
     console.error('加载数据失败:', error)
     // 如果API失败，使用模拟数据
-    records.value = [
+    const mockData = [
       { id: 1, point_id: '监测点001', date: '2024-03-11', time: '08:00', chlorine: 2.5, conductivity: 450.0, ph: 7.2, orp: 650.0, turbidity: 1.8 },
       { id: 2, point_id: '监测点002', date: '2024-03-11', time: '08:00', chlorine: 3.0, conductivity: 520.0, ph: 8.5, orp: 680.0, turbidity: 2.1 },
       { id: 3, point_id: '监测点003', date: '2024-03-11', time: '08:00', chlorine: 1.8, conductivity: 380.0, ph: 6.8, orp: 620.0, turbidity: 1.5 },
       { id: 4, point_id: '监测点004', date: '2024-03-11', time: '08:00', chlorine: 4.5, conductivity: 410.0, ph: 7.3, orp: 635.0, turbidity: 1.9 },
       { id: 5, point_id: '监测点005', date: '2024-03-11', time: '08:00', chlorine: 2.7, conductivity: 480.0, ph: 7.4, orp: 660.0, turbidity: 2.2 }
     ]
+    
+    records.value = mockData.map(record => ({
+      ...record,
+      status: checkRecordStatus(record)
+    }))
   } finally {
     loading.value = false
   }
+}
+
+// 报警阈值配置
+const alertThresholds = {
+  chlorine: { min: 0.5, max: 4.0 },
+  conductivity: { max: 1000 },
+  ph: { min: 6.5, max: 8.5 },
+  orp: { min: 400 },
+  turbidity: { max: 5.0 }
+}
+
+// 检查记录状态
+const checkRecordStatus = (record) => {
+  const alerts = []
+  
+  for (const [field, threshold] of Object.entries(alertThresholds)) {
+    const value = record[field]
+    if (value === undefined || value === null) continue
+    
+    if (threshold.min !== undefined && value < threshold.min) {
+      alerts.push(`${field}偏低`)
+    }
+    if (threshold.max !== undefined && value > threshold.max) {
+      alerts.push(`${field}偏高`)
+    }
+  }
+  
+  if (alerts.length === 0) return 'normal'
+  if (alerts.some(alert => alert.includes('偏高'))) {
+    return alerts.length > 1 ? 'danger' : 'warning'
+  }
+  return 'warning'
 }
 
 const toggleAllSelect = () => {
