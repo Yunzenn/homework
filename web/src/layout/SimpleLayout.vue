@@ -8,7 +8,25 @@
       <div class="header-right">
         <button class="theme-btn" @click="toggleTheme">🌙</button>
         <div class="user-info">
-          <span>管理员</span>
+          <span>{{ user?.username || '管理员' }}</span>
+          <el-dropdown @command="handleUserMenu" class="user-dropdown">
+            <el-button type="text" size="small">
+              <el-icon><ArrowDown /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="profile">
+                  <el-icon><User /></el-icon> 个人资料
+                </el-dropdown-item>
+                <el-dropdown-item command="settings">
+                  <el-icon><Setting /></el-icon> 系统设置
+                </el-dropdown-item>
+                <el-dropdown-item divided command="logout">
+                  <el-icon><SwitchButton /></el-icon> 退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </div>
     </header>
@@ -23,15 +41,15 @@
         <nav class="menu">
           <a href="#" class="menu-item" :class="{ active: currentPath === '/dashboard' }" @click="navigate('/dashboard')">
             <span class="icon">📊</span>
-            <span class="text" v-show="!sidebarCollapsed">仪表盘</span>
+            <span class="text" v-show="!sidebarCollapsed">主界面</span>
           </a>
           <a href="#" class="menu-item" :class="{ active: currentPath === '/records' }" @click="navigate('/records')">
-            <span class="icon">📝</span>
-            <span class="text" v-show="!sidebarCollapsed">数据管理</span>
+            <span class="icon">�</span>
+            <span class="text" v-show="!sidebarCollapsed">数据查看</span>
           </a>
           <a href="#" class="menu-item" :class="{ active: currentPath === '/batch-input' }" @click="navigate('/batch-input')">
-            <span class="icon">📥</span>
-            <span class="text" v-show="!sidebarCollapsed">批量输入</span>
+            <span class="icon">�</span>
+            <span class="text" v-show="!sidebarCollapsed">数据录入</span>
           </a>
           <a href="#" class="menu-item" :class="{ active: currentPath === '/query' }" @click="navigate('/query')">
             <span class="icon">🔍</span>
@@ -65,14 +83,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useSimpleStore } from '@/stores/simple'
+import { useAuthStore } from '@/stores/auth'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { User, Setting, SwitchButton, ArrowDown } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
 const simpleStore = useSimpleStore()
+const authStore = useAuthStore()
 
+const user = computed(() => authStore.user)
 const sidebarCollapsed = ref(false)
 const currentPath = ref('/dashboard')
 const isDark = ref(false)
@@ -94,9 +117,46 @@ const navigate = (path) => {
   router.push(path)
 }
 
+// 用户菜单处理
+const handleUserMenu = async (command) => {
+  switch (command) {
+    case 'profile':
+      ElMessage.info('个人资料功能开发中...')
+      break
+    case 'settings':
+      ElMessage.info('系统设置功能开发中...')
+      break
+    case 'logout':
+      try {
+        await ElMessageBox.confirm(
+          '确定要退出登录吗？',
+          '退出确认',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+        
+        await authStore.logout()
+        ElMessage.success('已退出登录')
+      } catch (error) {
+        if (error !== 'cancel') {
+          ElMessage.error('退出失败')
+        }
+      }
+      break
+  }
+}
+
 onMounted(() => {
   currentPath.value = route.path
   console.log('Pinia store message:', simpleStore.message)
+})
+
+// 监听路由变化
+watch(() => route.path, (newPath) => {
+  currentPath.value = newPath
 })
 </script>
 
@@ -151,6 +211,10 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   color: #666;
+}
+
+.user-dropdown {
+  margin-left: 4px;
 }
 
 .main-container {

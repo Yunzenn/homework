@@ -741,7 +741,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .records-container {
   .operation-card {
     margin-bottom: 20px;
@@ -783,7 +783,7 @@ onMounted(() => {
   }
 }
 
-// 水质状态颜色
+/* 水质状态颜色 */
 .water-quality-normal {
   color: #67c23a;
 }

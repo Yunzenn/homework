@@ -1,5 +1,7 @@
 import axios from 'axios'
 import { ElMessage, ElLoading } from 'element-plus'
+import { useAuthStore } from '@/stores/auth'
+import router from '@/router'
 
 // 创建axios实例
 const service = axios.create({
@@ -38,8 +40,11 @@ const hideLoading = () => {
 // 请求拦截器
 service.interceptors.request.use(
   config => {
-    // 可以在这里添加token等认证信息
-    // config.headers['Authorization'] = 'Bearer ' + getToken()
+    // 添加token认证信息
+    const authStore = useAuthStore()
+    if (authStore.token) {
+      config.headers['Authorization'] = `Bearer ${authStore.token}`
+    }
     
     // 显示loading（可选）
     if (config.showLoading !== false) {
@@ -83,7 +88,10 @@ service.interceptors.response.use(
           break
         case 401:
           ElMessage.error('未授权，请重新登录')
-          // 可以在这里处理登录跳转
+          // 清除认证信息并跳转到登录页
+          const authStore = useAuthStore()
+          authStore.logout()
+          router.push('/login')
           break
         case 403:
           ElMessage.error('拒绝访问')
@@ -104,6 +112,11 @@ service.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+// 封装通用请求方法
+export const request = (config) => {
+  return service(config)
+}
 
 // 封装GET请求
 export const get = (url, params = {}, config = {}) => {
