@@ -59,14 +59,6 @@
             <span class="icon">📊</span>
             <span class="text" v-show="!sidebarCollapsed">数据分析</span>
           </a>
-          <a href="#" class="menu-item" :class="{ active: currentPath === '/test-form' }" @click="navigate('/test-form')">
-            <span class="icon">🧪</span>
-            <span class="text" v-show="!sidebarCollapsed">测试表单</span>
-          </a>
-          <a href="#" class="menu-item" :class="{ active: currentPath === '/api-test' }" @click="navigate('/api-test')">
-            <span class="icon">🔧</span>
-            <span class="text" v-show="!sidebarCollapsed">API测试</span>
-          </a>
           <a href="#" class="menu-item" :class="{ active: currentPath === '/alerts' }" @click="navigate('/alerts')">
             <span class="icon">⚠️</span>
             <span class="text" v-show="!sidebarCollapsed">报警监控</span>

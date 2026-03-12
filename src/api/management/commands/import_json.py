@@ -71,7 +71,7 @@ class Command(BaseCommand):
                         # 创建记录
                         record = WaterQualityRecord.objects.create(
                             point_id=record_data.get('point_id', ''),
-                            date=record_data.get('date', '2024-01-01'),
+                            date=record_data.get('date', '2026-01-01'),
                             time=record_data.get('time', '00:00'),
                             chlorine=record_data.get('chlorine', 0.0),
                             conductivity=record_data.get('conductivity', 0.0),

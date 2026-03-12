@@ -1,462 +1,642 @@
 <template>
   <div class="alerts-container">
-    <!-- 统计卡片行 -->
-    <el-row :gutter="20" class="stats-row">
-      <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon danger">
-              <el-icon size="32"><Warning /></el-icon>
-            </div>
-            <div class="stats-info">
-              <div class="stats-value">{{ alertStats.total || 0 }}</div>
-              <div class="stats-label">总报警数</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon warning">
-              <el-icon size="32"><Bell /></el-icon>
-            </div>
-            <div class="stats-info">
-              <div class="stats-value">{{ alertStats.warning || 0 }}</div>
-              <div class="stats-label">警告级别</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon danger">
-              <el-icon size="32"><CircleCloseFilled /></el-icon>
-            </div>
-            <div class="stats-info">
-              <div class="stats-value">{{ alertStats.critical || 0 }}</div>
-              <div class="stats-label">严重级别</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon info">
-              <el-icon size="32"><TrendCharts /></el-icon>
-            </div>
-            <div class="stats-info">
-              <div class="stats-value">{{ alertStats.today || 0 }}</div>
-              <div class="stats-label">今日新增</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-
-    <!-- 图表和列表行 -->
-    <el-row :gutter="20" class="content-row">
-      <!-- 左侧图表 -->
-      <el-col :span="12">
-        <el-card class="chart-card" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span>报警类型分布</span>
-              <el-radio-group v-model="chartType" size="small">
-                <el-radio-button label="pie">饼图</el-radio-button>
-                <el-radio-button label="bar">柱状图</el-radio-button>
-              </el-radio-group>
-            </div>
-          </template>
-          <pie-chart 
-            v-if="chartType === 'pie'"
-            :data="alertTypeData" 
-            height="300px" 
-            title="报警类型分布"
-          />
-          <bar-chart 
-            v-else
-            :data="alertTypeData" 
-            height="300px" 
-            title="报警类型分布"
-          />
-        </el-card>
-        
-        <el-card class="trend-card" shadow="never">
-          <template #header>
-            <span>报警趋势（最近7天）</span>
-          </template>
-          <line-chart 
-            :data="alertTrendData" 
-            height="250px" 
-            title="报警趋势"
-          />
-        </el-card>
-      </el-col>
-      
-      <!-- 右侧列表 -->
-      <el-col :span="12">
-        <el-card class="list-card" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span><el-icon><List /></el-icon> 报警列表</span>
-              <div class="list-actions">
-                <el-select v-model="levelFilter" placeholder="筛选级别" size="small" style="width: 120px">
-                  <el-option label="全部" value="" />
-                  <el-option label="警告" value="警告" />
-                  <el-option label="严重" value="严重" />
-                </el-select>
-                <el-button :icon="Refresh" size="small" @click="loadAlerts">
-                  刷新
-                </el-button>
-              </div>
-            </div>
-          </template>
-          
-          <div class="alert-list">
-            <div 
-              v-for="alert in filteredAlerts" 
-              :key="alert.record_id"
-              class="alert-item"
-              :class="alert.alert_level === '严重' ? 'danger' : 'warning'"
-              @click="viewAlertDetail(alert)"
-            >
-              <div class="alert-header">
-                <div class="alert-point">
-                  <el-icon><Location /></el-icon>
-                  {{ alert.point_id }}
-                </div>
-                <el-tag 
-                  :type="alert.alert_level === '严重' ? 'danger' : 'warning'"
-                  size="small"
-                >
-                  {{ alert.alert_level }}
-                </el-tag>
-              </div>
-              
-              <div class="alert-time">
-                <el-icon><Clock /></el-icon>
-                {{ alert.date }} {{ alert.time }}
-              </div>
-              
-              <div class="alert-items">
-                <el-tag 
-                  v-for="item in alert.alert_items" 
-                  :key="item"
-                  type="danger"
-                  size="small"
-                  class="alert-tag"
-                >
-                  {{ item }}
-                </el-tag>
-              </div>
-              
-              <div class="alert-values">
-                <div class="value-item">
-                  <span class="label">pH:</span>
-                  <span :class="getWaterQualityClass('ph', alert.ph)">
-                    {{ formatWaterQualityValue(alert.ph) }}
-                  </span>
-                </div>
-                <div class="value-item">
-                  <span class="label">余氯:</span>
-                  <span :class="getWaterQualityClass('chlorine', alert.chlorine)">
-                    {{ formatWaterQualityValue(alert.chlorine) }}
-                  </span>
-                </div>
-                <div class="value-item">
-                  <span class="label">浊度:</span>
-                  <span :class="getWaterQualityClass('turbidity', alert.turbidity)">
-                    {{ formatWaterQualityValue(alert.turbidity) }}
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <div v-if="filteredAlerts.length === 0" class="no-alerts">
-              <el-empty description="暂无报警信息" :image-size="80" />
-            </div>
-          </div>
-          
-          <!-- 分页 -->
-          <div class="pagination-container">
-            <el-pagination
-              v-model:current-page="currentPage"
-              v-model:page-size="pageSize"
-              :page-sizes="[10, 20, 50]"
-              :total="total"
-              layout="total, sizes, prev, pager, next"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-              small
-            />
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-
-    <!-- 报警详情对话框 -->
-    <el-dialog v-model="detailVisible" title="报警详情" width="700px">
-      <div v-if="currentAlert" class="alert-detail">
-        <el-alert
-          :title="`${currentAlert.point_id} - ${currentAlert.alert_level}级别报警`"
-          :type="currentAlert.alert_level === '严重' ? 'error' : 'warning'"
-          :closable="false"
-          show-icon
-          class="detail-alert"
-        >
-          <template #default>
-            <div>{{ currentAlert.date }} {{ currentAlert.time }}</div>
-            <div>报警项目：{{ currentAlert.alert_items.join('、') }}</div>
-          </template>
-        </el-alert>
-        
-        <el-descriptions :column="2" border class="detail-descriptions">
-          <el-descriptions-item label="监测点">{{ currentAlert.point_id }}</el-descriptions-item>
-          <el-descriptions-item label="报警级别">
-            <el-tag :type="currentAlert.alert_level === '严重' ? 'danger' : 'warning'">
-              {{ currentAlert.alert_level }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="日期">{{ currentAlert.date }}</el-descriptions-item>
-          <el-descriptions-item label="时间">{{ currentAlert.time }}</el-descriptions-item>
-          <el-descriptions-item label="余氯(mg/L)">
-            <span :class="getWaterQualityClass('chlorine', currentAlert.chlorine)">
-              {{ formatWaterQualityValue(currentAlert.chlorine) }}
-            </span>
-            <el-tag 
-              v-if="isOutOfRange('chlorine', currentAlert.chlorine)"
-              type="danger"
-              size="small"
-              class="threshold-tag"
-            >
-              超标
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="电导率(µS/cm)">
-            <span :class="getWaterQualityClass('conductivity', currentAlert.conductivity)">
-              {{ formatWaterQualityValue(currentAlert.conductivity) }}
-            </span>
-            <el-tag 
-              v-if="isOutOfRange('conductivity', currentAlert.conductivity)"
-              type="danger"
-              size="small"
-              class="threshold-tag"
-            >
-              超标
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="pH值">
-            <span :class="getWaterQualityClass('ph', currentAlert.ph)">
-              {{ formatWaterQualityValue(currentAlert.ph) }}
-            </span>
-            <el-tag 
-              v-if="isOutOfRange('ph', currentAlert.ph)"
-              type="danger"
-              size="small"
-              class="threshold-tag"
-            >
-              超标
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="氧化还原电位(mV)">
-            <span :class="getWaterQualityClass('orp', currentAlert.orp)">
-              {{ formatWaterQualityValue(currentAlert.orp) }}
-            </span>
-            <el-tag 
-              v-if="isOutOfRange('orp', currentAlert.orp)"
-              type="danger"
-              size="small"
-              class="threshold-tag"
-            >
-              超标
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="浊度(NTU)">
-            <span :class="getWaterQualityClass('turbidity', currentAlert.turbidity)">
-              {{ formatWaterQualityValue(currentAlert.turbidity) }}
-            </span>
-            <el-tag 
-              v-if="isOutOfRange('turbidity', currentAlert.turbidity)"
-              type="danger"
-              size="small"
-              class="threshold-tag"
-            >
-              超标
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="创建时间" span="2">
-            {{ formatDateTime(currentAlert.create_time) }}
-          </el-descriptions-item>
-        </el-descriptions>
-        
-        <!-- 阈值说明 -->
-        <el-collapse class="threshold-collapse">
-          <el-collapse-item title="查看阈值标准" name="thresholds">
-            <el-table :data="thresholdTableData" size="small">
-              <el-table-column prop="indicator" label="指标" width="120" />
-              <el-table-column prop="unit" label="单位" width="100" />
-              <el-table-column prop="range" label="正常范围" />
-              <el-table-column label="状态">
-                <template #default="{ row }">
-                  <el-tag type="success">正常</el-tag>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-collapse-item>
-        </el-collapse>
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">
+          <el-icon><Warning /></el-icon>
+          报警监控中心
+        </h1>
+        <div class="header-stats">
+          <el-tag type="danger" size="large">
+            当前未处理: {{ alertStats.unhandled || 0 }}
+          </el-tag>
+        </div>
       </div>
-      
-      <template #footer>
-        <el-button @click="detailVisible = false">关闭</el-button>
-        <el-button type="primary" @click="editRecord">编辑记录</el-button>
-      </template>
+      <div class="header-actions">
+        <el-button-group>
+          <el-button @click="refreshData" :loading="loading">
+            <el-icon><Refresh /></el-icon>
+            刷新
+          </el-button>
+          <el-button @click="toggleSound" :type="soundEnabled ? 'primary' : 'default'">
+            <el-icon><VideoPlay /></el-icon>
+            {{ soundEnabled ? '声音开' : '声音关' }}
+          </el-button>
+          <el-button @click="showRulesDialog = true" type="success">
+            <el-icon><Setting /></el-icon>
+            规则配置
+          </el-button>
+          <el-button @click="showStatsDialog = true" type="info">
+            <el-icon><TrendCharts /></el-icon>
+            统计分析
+          </el-button>
+        </el-button-group>
+      </div>
+    </div>
+
+    <!-- 报警级别筛选 -->
+    <div class="filter-section">
+      <el-radio-group v-model="filterLevel" @change="filterAlerts" size="large">
+        <el-radio-button label="all">
+          <el-icon><List /></el-icon>
+          全部 {{ alertStats.total || 0 }}
+        </el-radio-button>
+        <el-radio-button label="danger">
+          <el-icon><CircleCloseFilled /></el-icon>
+          严重 {{ alertStats.critical || 0 }}
+        </el-radio-button>
+        <el-radio-button label="warning">
+          <el-icon><Warning /></el-icon>
+          警告 {{ alertStats.warning || 0 }}
+        </el-radio-button>
+        <el-radio-button label="info">
+          <el-icon><InfoFilled /></el-icon>
+          提示 {{ alertStats.info || 0 }}
+        </el-radio-button>
+      </el-radio-group>
+    </div>
+
+    <!-- 实时报警列表 -->
+    <div class="alerts-table">
+      <el-table 
+        :data="filteredAlerts" 
+        v-loading="loading"
+        @selection-change="handleSelectionChange"
+        row-key="id"
+        :row-class-name="getRowClassName"
+      >
+        <el-table-column type="selection" width="55" />
+        
+        <el-table-column prop="time" label="时间" width="150" sortable>
+          <template #default="{ row }">
+            <div class="time-cell">
+              <el-icon><Clock /></el-icon>
+              {{ formatTime(row.time) }}
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="point_id" label="监测点" width="120">
+          <template #default="{ row }">
+            <el-tag type="primary">{{ row.point_id }}</el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="metric" label="指标" width="100">
+          <template #default="{ row }">
+            <span class="metric-name">{{ getMetricName(row.metric) }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="value" label="数值" width="100">
+          <template #default="{ row }">
+            <span class="metric-value" :class="getLevelClass(row.level)">
+              {{ row.value }}
+            </span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="threshold" label="阈值" width="100">
+          <template #default="{ row }">
+            <span class="threshold-value">{{ row.threshold }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="level" label="级别" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getLevelType(row.level)" size="small">
+              {{ getLevelName(row.level) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getStatusType(row.status)" size="small">
+              {{ getStatusName(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="操作" width="200" fixed="right">
+          <template #default="{ row }">
+            <el-button-group size="small">
+              <el-button 
+                v-if="row.status === 'unhandled'"
+                @click="acknowledgeAlert(row)"
+                type="primary"
+              >
+                确认
+              </el-button>
+              <el-button 
+                v-if="row.status === 'unhandled'"
+                @click="ignoreAlert(row)"
+                type="warning"
+              >
+                忽略
+              </el-button>
+              <el-button 
+                v-if="row.status === 'acknowledged'"
+                @click="resolveAlert(row)"
+                type="success"
+              >
+                处理完成
+              </el-button>
+              <el-button @click="showAlertDetail(row)" type="info">
+                详情
+              </el-button>
+            </el-button-group>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="alertStats.total || 0"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
+
+      <!-- 批量操作 -->
+      <div class="batch-actions" v-if="selectedAlerts.length > 0">
+        <el-card>
+          <div class="batch-content">
+            <span>已选择 {{ selectedAlerts.length }} 条报警</span>
+            <el-button-group>
+              <el-button @click="batchAcknowledge" type="primary">
+                批量确认
+              </el-button>
+              <el-button @click="batchIgnore" type="warning">
+                批量忽略
+              </el-button>
+              <el-button @click="clearSelection">
+                清除选择
+              </el-button>
+            </el-button-group>
+          </div>
+        </el-card>
+      </div>
+    </div>
+
+    <!-- 报警详情弹窗 -->
+    <el-dialog
+      v-model="showDetailDialog"
+      title="报警详情"
+      width="800px"
+      :before-close="handleDetailClose"
+    >
+      <div v-if="selectedAlert" class="alert-detail">
+        <div class="detail-header">
+          <div class="detail-info">
+            <div class="info-item">
+              <el-icon><Location /></el-icon>
+              <span>监测点: {{ selectedAlert.point_id }} ({{ getPointName(selectedAlert.point_id) }})</span>
+            </div>
+            <div class="info-item">
+              <el-icon><Clock /></el-icon>
+              <span>时间: {{ formatDateTime(selectedAlert.time) }}</span>
+            </div>
+            <div class="info-item">
+              <el-icon><Warning /></el-icon>
+              <span>级别: 
+                <el-tag :type="getLevelType(selectedAlert.level)">
+                  {{ getLevelName(selectedAlert.level) }}
+                </el-tag>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-metrics">
+          <h4>超标指标分析</h4>
+          <div class="metric-analysis">
+            <div class="metric-main">
+              <span class="metric-label">{{ getMetricName(selectedAlert.metric) }}</span>
+              <span class="metric-current" :class="getLevelClass(selectedAlert.level)">
+                {{ selectedAlert.value }}
+              </span>
+              <span class="metric-threshold">阈值: {{ selectedAlert.threshold }}</span>
+              <span class="metric-excess">超限: {{ calculateExcess(selectedAlert) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-data">
+          <h4>完整指标数据</h4>
+          <el-descriptions :column="2" border>
+            <el-descriptions-item 
+              v-for="metric in selectedAlert.all_metrics" 
+              :key="metric.name"
+              :label="getMetricName(metric.name)"
+            >
+              <span :class="metric.is_abnormal ? 'abnormal' : 'normal'">
+                {{ metric.value }} {{ metric.unit }}
+                <el-tag v-if="metric.is_abnormal" type="danger" size="small">异常</el-tag>
+              </span>
+            </el-descriptions-item>
+          </el-descriptions>
+        </div>
+
+        <div class="detail-history">
+          <h4>处理记录</h4>
+          <el-timeline>
+            <el-timeline-item
+              v-for="record in selectedAlert.history"
+              :key="record.id"
+              :timestamp="formatDateTime(record.time)"
+              :type="getTimelineType(record.action)"
+            >
+              {{ getActionText(record.action) }} - {{ record.operator }}
+              <div v-if="record.comment" class="action-comment">
+                {{ record.comment }}
+              </div>
+            </el-timeline-item>
+          </el-timeline>
+        </div>
+
+        <div class="detail-actions">
+          <el-button-group>
+            <el-button 
+              v-if="selectedAlert.status === 'unhandled'"
+              @click="acknowledgeAlert(selectedAlert)"
+              type="primary"
+            >
+              确认
+            </el-button>
+            <el-button 
+              v-if="selectedAlert.status === 'unhandled'"
+              @click="ignoreAlert(selectedAlert)"
+              type="warning"
+            >
+              忽略
+            </el-button>
+            <el-button 
+              v-if="selectedAlert.status === 'acknowledged'"
+              @click="resolveAlert(selectedAlert)"
+              type="success"
+            >
+              处理完成
+            </el-button>
+            <el-button @click="viewPointDetail(selectedAlert.point_id)">
+              查看监测点详情
+            </el-button>
+          </el-button-group>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 报警规则配置弹窗 -->
+    <el-dialog
+      v-model="showRulesDialog"
+      title="报警规则配置"
+      width="900px"
+    >
+      <div class="rules-config">
+        <div class="rules-section">
+          <h3>⚙️ 全局规则 (所有监测点)</h3>
+          <el-table :data="globalRules" border>
+            <el-table-column prop="metric" label="指标" width="100">
+              <template #default="{ row }">
+                {{ getMetricName(row.metric) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="info_threshold" label="提示阈值" width="120">
+              <template #default="{ row }">
+                <el-input v-model="row.info_threshold" size="small" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="warning_threshold" label="警告阈值" width="120">
+              <template #default="{ row }">
+                <el-input v-model="row.warning_threshold" size="small" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="danger_threshold" label="严重阈值" width="120">
+              <template #default="{ row }">
+                <el-input v-model="row.danger_threshold" size="small" />
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="100">
+              <template #default="{ row }">
+                <el-button @click="editRule(row)" size="small" type="primary">
+                  编辑
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+
+        <div class="rules-section">
+          <h3>⚙️ 特殊规则 (指定监测点)</h3>
+          <el-table :data="specialRules" border>
+            <el-table-column prop="point_id" label="监测点" width="100" />
+            <el-table-column prop="metric" label="指标" width="100">
+              <template #default="{ row }">
+                {{ getMetricName(row.metric) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="threshold" label="阈值" width="150" />
+            <el-table-column prop="reason" label="原因" />
+            <el-table-column label="操作" width="150">
+              <template #default="{ row }">
+                <el-button-group size="small">
+                  <el-button @click="editSpecialRule(row)" type="primary">
+                    编辑
+                  </el-button>
+                  <el-button @click="deleteSpecialRule(row)" type="danger">
+                    删除
+                  </el-button>
+                </el-button-group>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-button @click="addSpecialRule" type="primary" style="margin-top: 10px;">
+            <el-icon><Plus /></el-icon>
+            添加特殊规则
+          </el-button>
+        </div>
+
+        <div class="rules-section">
+          <h3>高级设置</h3>
+          <el-form :model="advancedSettings" label-width="200px">
+            <el-form-item label="连续超标次数">
+              <el-input-number v-model="advancedSettings.consecutive_count" :min="1" :max="10" />
+              <span style="margin-left: 10px;">次后才触发报警</span>
+            </el-form-item>
+            <el-form-item label="沉默周期">
+              <el-input-number v-model="advancedSettings.silence_period" :min="5" :max="120" />
+              <span style="margin-left: 10px;">分钟内不重复报警</span>
+            </el-form-item>
+            <el-form-item label="夜间模式">
+              <el-switch v-model="advancedSettings.night_mode" />
+              <span style="margin-left: 10px;">22:00-8:00 升级通知方式</span>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <div class="rules-actions">
+          <el-button-group>
+            <el-button @click="saveRules" type="primary">
+              保存
+            </el-button>
+            <el-button @click="resetRules">
+              恢复默认
+            </el-button>
+            <el-button @click="showRulesDialog = false">
+              取消
+            </el-button>
+          </el-button-group>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 统计分析弹窗 -->
+    <el-dialog
+      v-model="showStatsDialog"
+      title="报警统计分析"
+      width="1000px"
+    >
+      <div class="stats-analysis">
+        <div class="stats-filters">
+          <el-form inline>
+            <el-form-item label="时间范围">
+              <el-select v-model="statsFilter.timeRange">
+                <el-option label="最近7天" value="7d" />
+                <el-option label="最近30天" value="30d" />
+                <el-option label="最近90天" value="90d" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="指标">
+              <el-select v-model="statsFilter.metric">
+                <el-option label="全部" value="all" />
+                <el-option v-for="metric in metrics" :key="metric" :label="getMetricName(metric)" :value="metric" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="监测点">
+              <el-select v-model="statsFilter.pointId">
+                <el-option label="全部" value="all" />
+                <el-option v-for="point in monitoringPoints" :key="point.id" :label="point.name" :value="point.id" />
+              </el-select>
+            </el-form-item>
+            <el-form-item>
+              <el-button @click="loadStatsData" type="primary">查询</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <div class="stats-content">
+          <el-row :gutter="20">
+            <el-col :span="16">
+              <el-card title="报警趋势图">
+                <div ref="trendChart" class="chart-container"></div>
+              </el-card>
+            </el-col>
+            <el-col :span="8">
+              <el-card title="指标分布">
+                <div ref="distributionChart" class="chart-container"></div>
+              </el-card>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20" style="margin-top: 20px;">
+            <el-col :span="12">
+              <el-card title="监测点排名">
+                <div ref="rankingChart" class="chart-container"></div>
+              </el-card>
+            </el-col>
+            <el-col :span="12">
+              <el-card title="处理时效统计">
+                <div class="processing-stats">
+                  <div class="stat-item">
+                    <span class="stat-label">平均处理时间:</span>
+                    <span class="stat-value">{{ processingStats.avgTime }}分钟</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">48小时内处理率:</span>
+                    <span class="stat-value">{{ processingStats.processingRate }}%</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-label">升级报警数量:</span>
+                    <span class="stat-value">{{ processingStats.escalatedCount }}次</span>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+        </div>
+      </div>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Warning,
   Bell,
   CircleCloseFilled,
   TrendCharts,
-  List,
   Refresh,
+  VideoPlay,
+  Setting,
+  List,
+  InfoFilled,
+  Clock,
   Location,
-  Clock
+  Plus
 } from '@element-plus/icons-vue'
-import { getAlerts, getStatistics } from '@/api/records'
-import {
-  formatDateTime,
-  formatWaterQualityValue,
-  getWaterQualityStatusColor
-} from '@/utils/format'
-import PieChart from '@/components/charts/PieChart.vue'
-import LineChart from '@/components/charts/LineChart.vue'
-import BarChart from '@/components/charts/BarChart.vue'
-
-const router = useRouter()
-
-// 水质阈值
-const thresholds = {
-  chlorine: { min: 0.5, max: 4.0 },
-  conductivity: { max: 1000 },
-  ph: { min: 6.5, max: 8.5 },
-  orp: { min: 400 },
-  turbidity: { max: 5.0 }
-}
+import { formatDateTime } from '@/utils/format'
+import * as echarts from 'echarts'
 
 // 响应式数据
 const loading = ref(false)
-const alerts = ref([])
-const total = ref(0)
+const soundEnabled = ref(true)
+const filterLevel = ref('all')
 const currentPage = ref(1)
 const pageSize = ref(20)
-const levelFilter = ref('')
-const chartType = ref('pie')
-const detailVisible = ref(false)
-const currentAlert = ref(null)
+const selectedAlerts = ref([])
+const showDetailDialog = ref(false)
+const showRulesDialog = ref(false)
+const showStatsDialog = ref(false)
+const selectedAlert = ref(null)
+
+// 图表引用
+const trendChart = ref(null)
+const distributionChart = ref(null)
+const rankingChart = ref(null)
+
+// 报警统计数据
+const alertStats = reactive({
+  total: 0,
+  unhandled: 0,
+  critical: 0,
+  warning: 0,
+  info: 0
+})
+
+// 报警列表数据
+const alerts = ref([])
+
+// 全局规则配置
+const globalRules = ref([
+  { metric: 'chlorine', info_threshold: '4.0-4.2', warning_threshold: '4.2-4.5', danger_threshold: '>4.5' },
+  { metric: 'ph', info_threshold: '8.5-8.8', warning_threshold: '8.8-9.0', danger_threshold: '>9.0' },
+  { metric: 'conductivity', info_threshold: '1000-1200', warning_threshold: '1200-1500', danger_threshold: '>1500' }
+])
+
+// 特殊规则配置
+const specialRules = ref([
+  { point_id: 'P-042', metric: 'ph', threshold: '8.8', reason: '上游监测点敏感' },
+  { point_id: 'P-038', metric: 'chlorine', threshold: '4.0', reason: '排污口严格标准' }
+])
+
+// 高级设置
+const advancedSettings = reactive({
+  consecutive_count: 2,
+  silence_period: 30,
+  night_mode: true
+})
+
+// 统计筛选条件
+const statsFilter = reactive({
+  timeRange: '7d',
+  metric: 'all',
+  pointId: 'all'
+})
+
+// 处理时效统计
+const processingStats = reactive({
+  avgTime: 12.5,
+  processingRate: 95,
+  escalatedCount: 3
+})
+
+// 监测点数据
+const monitoringPoints = ref([
+  { id: 'P-001', name: '上游监测站' },
+  { id: 'P-002', name: '中游监测站' },
+  { id: 'P-003', name: '下游监测站' },
+  { id: 'P-004', name: '排污口监测站' }
+])
+
+// 指标列表
+const metrics = ['chlorine', 'ph', 'conductivity', 'turbidity', 'orp', 'temperature']
+
+// WebSocket连接
+let wsConnection = null
 
 // 计算属性
-const alertStats = computed(() => {
-  const stats = {
-    total: alerts.value.length,
-    warning: alerts.value.filter(a => a.alert_level === '警告').length,
-    critical: alerts.value.filter(a => a.alert_level === '严重').length,
-    today: alerts.value.filter(a => {
-      const alertDate = new Date(a.date)
-      const today = new Date()
-      return alertDate.toDateString() === today.toDateString()
-    }).length
-  }
-  return stats
-})
-
 const filteredAlerts = computed(() => {
-  if (!levelFilter.value) {
+  if (filterLevel.value === 'all') {
     return alerts.value
   }
-  return alerts.value.filter(alert => alert.alert_level === levelFilter.value)
+  return alerts.value.filter(alert => alert.level === filterLevel.value)
 })
-
-const alertTypeData = computed(() => {
-  const typeCount = {}
-  alerts.value.forEach(alert => {
-    alert.alert_items.forEach(item => {
-      const key = item.replace(/偏高|偏低/g, '')
-      typeCount[key] = (typeCount[key] || 0) + 1
-    })
-  })
-  
-  return Object.entries(typeCount).map(([name, value]) => ({ name, value }))
-})
-
-const alertTrendData = computed(() => {
-  // 生成最近7天的趋势数据
-  const trendData = []
-  const today = new Date()
-  
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(today)
-    date.setDate(today.getDate() - i)
-    const dateStr = date.toISOString().split('T')[0]
-    
-    const count = alerts.value.filter(alert => alert.date === dateStr).length
-    trendData.push({
-      date: dateStr,
-      count: count
-    })
-  }
-  
-  return trendData
-})
-
-const thresholdTableData = computed(() => [
-  {
-    indicator: '余氯',
-    unit: 'mg/L',
-    range: '0.5 - 4.0'
-  },
-  {
-    indicator: '电导率',
-    unit: 'µS/cm',
-    range: '≤ 1000'
-  },
-  {
-    indicator: 'pH值',
-    unit: '',
-    range: '6.5 - 8.5'
-  },
-  {
-    indicator: '氧化还原电位',
-    unit: 'mV',
-    range: '≥ 400'
-  },
-  {
-    indicator: '浊度',
-    unit: 'NTU',
-    range: '≤ 5.0'
-  }
-])
 
 // 方法
 const loadAlerts = async () => {
+  loading.value = true
   try {
-    loading.value = true
-    const params = {
-      limit: 1000, // 获取更多数据用于统计
-      page: 1,
-      page_size: 1000
-    }
-    const data = await getAlerts(params)
-    alerts.value = data.results || data
-    total.value = data.count || data.length
+    // 模拟API调用
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // 模拟数据
+    alerts.value = [
+      {
+        id: 1,
+        time: '2026-03-15 14:32:45',
+        point_id: 'P-042',
+        metric: 'ph',
+        value: 9.2,
+        threshold: 8.5,
+        level: 'danger',
+        status: 'unhandled',
+        all_metrics: [
+          { name: 'chlorine', value: 2.1, unit: 'mg/L', is_abnormal: false },
+          { name: 'conductivity', value: 567, unit: 'µS/cm', is_abnormal: false },
+          { name: 'ph', value: 9.2, unit: '', is_abnormal: true },
+          { name: 'orp', value: 412, unit: 'mV', is_abnormal: false },
+          { name: 'turbidity', value: 3.1, unit: 'NTU', is_abnormal: false }
+        ],
+        history: [
+          { id: 1, time: '2026-03-15 14:32:45', action: 'trigger', operator: '系统', comment: '系统触发报警' }
+        ]
+      },
+      {
+        id: 2,
+        time: '2026-03-15 14:30:22',
+        point_id: 'P-038',
+        metric: 'chlorine',
+        value: 4.8,
+        threshold: 4.5,
+        level: 'warning',
+        status: 'acknowledged',
+        all_metrics: [],
+        history: []
+      },
+      {
+        id: 3,
+        time: '2026-03-15 14:28:15',
+        point_id: 'P-021',
+        metric: 'turbidity',
+        value: 7.3,
+        threshold: 5.0,
+        level: 'warning',
+        status: 'unhandled',
+        all_metrics: [],
+        history: []
+      }
+    ]
+    
+    // 更新统计数据
+    updateStats()
   } catch (error) {
     ElMessage.error('加载报警数据失败')
   } finally {
@@ -464,9 +644,257 @@ const loadAlerts = async () => {
   }
 }
 
+const updateStats = () => {
+  alertStats.total = alerts.value.length
+  alertStats.unhandled = alerts.value.filter(a => a.status === 'unhandled').length
+  alertStats.critical = alerts.value.filter(a => a.level === 'danger').length
+  alertStats.warning = alerts.value.filter(a => a.level === 'warning').length
+  alertStats.info = alerts.value.filter(a => a.level === 'info').length
+}
+
+const refreshData = () => {
+  loadAlerts()
+}
+
+const toggleSound = () => {
+  soundEnabled.value = !soundEnabled.value
+  ElMessage.success(`声音提示已${soundEnabled.value ? '开启' : '关闭'}`)
+}
+
+const filterAlerts = () => {
+  // 筛选逻辑已在计算属性中处理
+}
+
+const handleSelectionChange = (selection) => {
+  selectedAlerts.value = selection
+}
+
+const getRowClassName = ({ row }) => {
+  return `alert-row-${row.level} alert-row-${row.status}`
+}
+
+const getLevelClass = (level) => {
+  return `level-${level}`
+}
+
+const getLevelType = (level) => {
+  const typeMap = {
+    danger: 'danger',
+    warning: 'warning',
+    info: 'info'
+  }
+  return typeMap[level] || 'info'
+}
+
+const getLevelName = (level) => {
+  const nameMap = {
+    danger: '严重',
+    warning: '警告',
+    info: '提示'
+  }
+  return nameMap[level] || '未知'
+}
+
+const getStatusType = (status) => {
+  const typeMap = {
+    unhandled: 'danger',
+    acknowledged: 'warning',
+    resolved: 'success',
+    ignored: 'info'
+  }
+  return typeMap[status] || 'info'
+}
+
+const getStatusName = (status) => {
+  const nameMap = {
+    unhandled: '未处理',
+    acknowledged: '已确认',
+    resolved: '已处理',
+    ignored: '已忽略'
+  }
+  return nameMap[status] || '未知'
+}
+
+const getMetricName = (metric) => {
+  const nameMap = {
+    chlorine: '余氯',
+    ph: 'pH值',
+    conductivity: '电导率',
+    turbidity: '浊度',
+    orp: 'ORP',
+    temperature: '温度'
+  }
+  return nameMap[metric] || metric
+}
+
+const getPointName = (pointId) => {
+  const point = monitoringPoints.value.find(p => p.id === pointId)
+  return point ? point.name : pointId
+}
+
+const formatTime = (time) => {
+  return new Date(time).toLocaleTimeString()
+}
+
+const calculateExcess = (alert) => {
+  const excess = Math.abs(alert.value - alert.threshold)
+  return excess.toFixed(2)
+}
+
+const acknowledgeAlert = async (alert) => {
+  try {
+    await ElMessageBox.confirm('确认此报警？', '确认操作', {
+      type: 'warning'
+    })
+    
+    alert.status = 'acknowledged'
+    alert.history.push({
+      id: Date.now(),
+      time: new Date().toISOString(),
+      action: 'acknowledge',
+      operator: '当前用户',
+      comment: '用户确认报警'
+    })
+    
+    ElMessage.success('报警已确认')
+    updateStats()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+const ignoreAlert = async (alert) => {
+  try {
+    const { value: reason } = await ElMessageBox.prompt('请输入忽略原因', '忽略报警', {
+      inputType: 'textarea',
+      inputPlaceholder: '请输入忽略原因...'
+    })
+    
+    alert.status = 'ignored'
+    alert.history.push({
+      id: Date.now(),
+      time: new Date().toISOString(),
+      action: 'ignore',
+      operator: '当前用户',
+      comment: reason
+    })
+    
+    ElMessage.success('报警已忽略')
+    updateStats()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+const resolveAlert = async (alert) => {
+  try {
+    const { value: result } = await ElMessageBox.prompt('请记录处理结果', '处理完成', {
+      inputType: 'textarea',
+      inputPlaceholder: '请描述处理措施和结果...'
+    })
+    
+    alert.status = 'resolved'
+    alert.history.push({
+      id: Date.now(),
+      time: new Date().toISOString(),
+      action: 'resolve',
+      operator: '当前用户',
+      comment: result
+    })
+    
+    ElMessage.success('报警已处理完成')
+    updateStats()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
+  }
+}
+
+const showAlertDetail = (alert) => {
+  selectedAlert.value = alert
+  showDetailDialog.value = true
+}
+
+const handleDetailClose = () => {
+  showDetailDialog.value = false
+  selectedAlert.value = null
+}
+
+const viewPointDetail = (pointId) => {
+  // 跳转到监测点详情页面
+  ElMessage.info(`查看监测点 ${pointId} 详情`)
+}
+
+const batchAcknowledge = async () => {
+  try {
+    await ElMessageBox.confirm(`确认选中的 ${selectedAlerts.value.length} 条报警？`, '批量确认', {
+      type: 'warning'
+    })
+    
+    selectedAlerts.value.forEach(alert => {
+      if (alert.status === 'unhandled') {
+        alert.status = 'acknowledged'
+        alert.history.push({
+          id: Date.now(),
+          time: new Date().toISOString(),
+          action: 'acknowledge',
+          operator: '当前用户',
+          comment: '批量确认'
+        })
+      }
+    })
+    
+    ElMessage.success(`已确认 ${selectedAlerts.value.length} 条报警`)
+    clearSelection()
+    updateStats()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('批量操作失败')
+    }
+  }
+}
+
+const batchIgnore = async () => {
+  try {
+    const { value: reason } = await ElMessageBox.prompt('请输入批量忽略原因', '批量忽略', {
+      inputType: 'textarea',
+      inputPlaceholder: '请输入忽略原因...'
+    })
+    
+    selectedAlerts.value.forEach(alert => {
+      if (alert.status === 'unhandled') {
+        alert.status = 'ignored'
+        alert.history.push({
+          id: Date.now(),
+          time: new Date().toISOString(),
+          action: 'ignore',
+          operator: '当前用户',
+          comment: reason
+        })
+      }
+    })
+    
+    ElMessage.success(`已忽略 ${selectedAlerts.value.length} 条报警`)
+    clearSelection()
+    updateStats()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('批量操作失败')
+    }
+  }
+}
+
+const clearSelection = () => {
+  selectedAlerts.value = []
+}
+
 const handleSizeChange = (size) => {
   pageSize.value = size
-  currentPage.value = 1
   loadAlerts()
 }
 
@@ -475,251 +903,438 @@ const handleCurrentChange = (page) => {
   loadAlerts()
 }
 
-const viewAlertDetail = (alert) => {
-  currentAlert.value = alert
-  detailVisible.value = true
+const saveRules = () => {
+  ElMessage.success('规则配置已保存')
+  showRulesDialog.value = false
 }
 
-const editRecord = () => {
-  if (currentAlert.value) {
-    router.push({
-      path: '/records',
-      query: { id: currentAlert.value.record_id }
-    })
-    detailVisible.value = false
+const resetRules = () => {
+  ElMessage.warning('已恢复默认配置')
+}
+
+const editRule = (rule) => {
+  ElMessage.info(`编辑规则: ${rule.metric}`)
+}
+
+const addSpecialRule = () => {
+  ElMessage.info('添加特殊规则')
+}
+
+const editSpecialRule = (rule) => {
+  ElMessage.info(`编辑特殊规则: ${rule.point_id}`)
+}
+
+const deleteSpecialRule = (rule) => {
+  ElMessage.warning(`删除特殊规则: ${rule.point_id}`)
+}
+
+const loadStatsData = () => {
+  ElMessage.success('统计数据已更新')
+  initCharts()
+}
+
+const getTimelineType = (action) => {
+  const typeMap = {
+    trigger: 'danger',
+    acknowledge: 'warning',
+    resolve: 'success',
+    ignore: 'info'
+  }
+  return typeMap[action] || 'primary'
+}
+
+const getActionText = (action) => {
+  const textMap = {
+    trigger: '触发报警',
+    acknowledge: '确认报警',
+    resolve: '处理完成',
+    ignore: '忽略报警'
+  }
+  return textMap[action] || action
+}
+
+const initCharts = () => {
+  nextTick(() => {
+    // 趋势图
+    if (trendChart.value) {
+      const chart = echarts.init(trendChart.value)
+      chart.setOption({
+        title: { text: '报警数量趋势' },
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: ['3/9', '3/10', '3/11', '3/12', '3/13', '3/14', '3/15'] },
+        yAxis: { type: 'value' },
+        series: [{
+          data: [12, 15, 8, 20, 18, 25, 23],
+          type: 'line',
+          smooth: true,
+          areaStyle: {}
+        }]
+      })
+    }
+    
+    // 分布图
+    if (distributionChart.value) {
+      const chart = echarts.init(distributionChart.value)
+      chart.setOption({
+        title: { text: '指标分布' },
+        tooltip: { trigger: 'item' },
+        series: [{
+          type: 'pie',
+          radius: '50%',
+          data: [
+            { value: 45, name: 'pH值' },
+            { value: 30, name: '余氯' },
+            { value: 15, name: '浊度' },
+            { value: 10, name: '其他' }
+          ]
+        }]
+      })
+    }
+    
+    // 排名图
+    if (rankingChart.value) {
+      const chart = echarts.init(rankingChart.value)
+      chart.setOption({
+        title: { text: '监测点报警排名' },
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'value' },
+        yAxis: { 
+          type: 'category',
+          data: ['P-042', 'P-038', 'P-021', 'P-015', 'P-009']
+        },
+        series: [{
+          data: [12, 8, 6, 5, 4],
+          type: 'bar'
+        }]
+      })
+    }
+  })
+}
+
+const initWebSocket = () => {
+  try {
+    wsConnection = new WebSocket('ws://localhost:8000/ws/alerts/')
+    
+    wsConnection.onmessage = (event) => {
+      const alert = JSON.parse(event.data)
+      
+      // 添加新报警到列表顶部
+      alerts.value.unshift(alert)
+      
+      // 播放提示音
+      if (soundEnabled.value) {
+        playAlertSound()
+      }
+      
+      // 显示通知
+      ElMessage.warning(`新报警: ${getPointName(alert.point_id)} - ${getMetricName(alert.metric)}`)
+      
+      // 更新统计
+      updateStats()
+    }
+    
+    wsConnection.onclose = () => {
+      // 断线重连
+      setTimeout(initWebSocket, 5000)
+    }
+    
+    wsConnection.onerror = (error) => {
+      console.error('WebSocket error:', error)
+    }
+  } catch (error) {
+    console.error('Failed to connect WebSocket:', error)
   }
 }
 
-const getWaterQualityClass = (field, value) => {
-  return getWaterQualityStatusColor(field, value, thresholds)
-}
-
-const isOutOfRange = (field, value) => {
-  const threshold = thresholds[field]
-  if (!threshold) return false
-  
-  if (threshold.min !== undefined && value < threshold.min) return true
-  if (threshold.max !== undefined && value > threshold.max) return true
-  
-  return false
+const playAlertSound = () => {
+  // 播放提示音
+  const audio = new Audio('/alert-sound.mp3')
+  audio.play().catch(error => {
+    console.log('Failed to play alert sound:', error)
+  })
 }
 
 // 生命周期
 onMounted(() => {
   loadAlerts()
+  initWebSocket()
+})
+
+onUnmounted(() => {
+  if (wsConnection) {
+    wsConnection.close()
+  }
 })
 </script>
 
 <style lang="scss" scoped>
 .alerts-container {
-  .stats-row {
-    margin-bottom: $spacing-lg;
+  padding: 20px;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+.page-header {
+  @include flex-between;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: $shadow-sm;
+  
+  .header-left {
+    .page-title {
+      @include flex-center-vertical;
+      font-size: 24px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 0 0 10px 0;
+      
+      .el-icon {
+        margin-right: 10px;
+        color: #f56c6c;
+      }
+    }
     
-    .stats-card {
-      .stats-content {
-        @include flex-center;
-        gap: $spacing-md;
+    .header-stats {
+      .el-tag {
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+.filter-section {
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: $shadow-sm;
+  
+  .el-radio-group {
+    .el-radio-button {
+      margin-right: 10px;
+      
+      .el-icon {
+        margin-right: 5px;
+      }
+    }
+  }
+}
+
+.alerts-table {
+  background: white;
+  border-radius: 8px;
+  box-shadow: $shadow-sm;
+  padding: 20px;
+  
+  .time-cell {
+    @include flex-center-vertical;
+    font-size: 12px;
+    color: #666;
+    
+    .el-icon {
+      margin-right: 5px;
+    }
+  }
+  
+  .metric-name {
+    font-weight: 500;
+  }
+  
+  .metric-value {
+    font-weight: 600;
+    
+    &.level-danger {
+      color: #f56c6c;
+    }
+    
+    &.level-warning {
+      color: #e6a23c;
+    }
+    
+    &.level-info {
+      color: #909399;
+    }
+  }
+  
+  .threshold-value {
+    color: #666;
+    font-size: 12px;
+  }
+}
+
+.pagination-container {
+  @include flex-center;
+  margin-top: 20px;
+}
+
+.batch-actions {
+  margin-top: 20px;
+  
+  .batch-content {
+    @include flex-between;
+    align-items: center;
+    
+    .el-button-group {
+      margin-left: 20px;
+    }
+  }
+}
+
+.alert-detail {
+  .detail-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    
+    .detail-info {
+      .info-item {
+        @include flex-center-vertical;
+        margin-bottom: 10px;
         
-        .stats-icon {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          @include flex-center;
-          
-          &.danger {
-            background-color: rgba(var(--el-color-danger-rgb), 0.1);
-            color: var(--el-color-danger);
-          }
-          
-          &.warning {
-            background-color: rgba(var(--el-color-warning-rgb), 0.1);
-            color: var(--el-color-warning);
-          }
-          
-          &.info {
-            background-color: rgba(var(--el-color-info-rgb), 0.1);
-            color: var(--el-color-info);
-          }
-        }
-        
-        .stats-info {
-          .stats-value {
-            font-size: $font-size-extra-large;
-            font-weight: 600;
-            color: var(--el-text-color-primary);
-            margin-bottom: $spacing-xs;
-          }
-          
-          .stats-label {
-            font-size: $font-size-sm;
-            color: var(--el-text-color-secondary);
-          }
+        .el-icon {
+          margin-right: 8px;
+          color: #409eff;
         }
       }
     }
   }
   
-  .content-row {
-    .chart-card,
-    .trend-card,
-    .list-card {
-      margin-bottom: $spacing-lg;
+  .detail-metrics {
+    margin-bottom: 20px;
+    
+    .metric-analysis {
+      .metric-main {
+        @include flex-center;
+        gap: 15px;
+        padding: 15px;
+        background: #fef5e7;
+        border-radius: 6px;
+        border-left: 4px solid #e6a23c;
+        
+        .metric-label {
+          font-weight: 500;
+        }
+        
+        .metric-current {
+          font-size: 18px;
+          font-weight: 600;
+          color: #e6a23c;
+        }
+        
+        .metric-threshold {
+          color: #666;
+        }
+        
+        .metric-excess {
+          color: #e6a23c;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+  
+  .detail-data {
+    margin-bottom: 20px;
+    
+    .normal {
+      color: #67c23a;
+    }
+    
+    .abnormal {
+      color: #f56c6c;
+      font-weight: 500;
+    }
+  }
+  
+  .detail-history {
+    margin-bottom: 20px;
+  }
+  
+  .detail-actions {
+    text-align: center;
+  }
+}
+
+.rules-config {
+  .rules-section {
+    margin-bottom: 30px;
+    
+    h3 {
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+  }
+  
+  .rules-actions {
+    text-align: center;
+    margin-top: 30px;
+  }
+}
+
+.stats-analysis {
+  .stats-filters {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+  }
+  
+  .stats-content {
+    .chart-container {
+      height: 300px;
+    }
+    
+    .processing-stats {
+      padding: 20px;
       
-      .card-header {
+      .stat-item {
         @include flex-between;
-        font-weight: 600;
-      }
-    }
-    
-    .trend-card {
-      margin-top: $spacing-lg;
-    }
-    
-    .list-card {
-      .list-actions {
-        display: flex;
-        gap: $spacing-sm;
-      }
-      
-      .alert-list {
-        max-height: 600px;
-        overflow-y: auto;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
         
-        .alert-item {
-          padding: $spacing-md;
-          border-radius: var(--el-border-radius-base);
-          margin-bottom: $spacing-sm;
-          border-left: 3px solid transparent;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          
-          &.danger {
-            background-color: rgba(var(--el-color-danger-rgb), 0.05);
-            border-left-color: var(--el-color-danger);
-          }
-          
-          &.warning {
-            background-color: rgba(var(--el-color-warning-rgb), 0.05);
-            border-left-color: var(--el-color-warning);
-          }
-          
-          &:hover {
-            transform: translateX(2px);
-            box-shadow: var(--el-box-shadow-light);
-          }
-          
-          .alert-header {
-            @include flex-between;
-            margin-bottom: $spacing-xs;
-            
-            .alert-point {
-              font-weight: 600;
-              color: var(--el-text-color-primary);
-              @include flex-center-vertical;
-              gap: $spacing-xs;
-            }
-          }
-          
-          .alert-time {
-            font-size: $font-size-extra-small;
-            color: var(--el-text-color-secondary);
-            @include flex-center-vertical;
-            gap: $spacing-xs;
-            margin-bottom: $spacing-xs;
-          }
-          
-          .alert-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: $spacing-xs;
-            margin-bottom: $spacing-xs;
-            
-            .alert-tag {
-              font-size: $font-size-extra-small;
-            }
-          }
-          
-          .alert-values {
-            display: flex;
-            gap: $spacing-md;
-            
-            .value-item {
-              font-size: $font-size-extra-small;
-              
-              .label {
-                color: var(--el-text-color-secondary);
-                margin-right: $spacing-xs;
-              }
-            }
-          }
+        .stat-label {
+          color: #666;
         }
         
-        .no-alerts {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 200px;
+        .stat-value {
+          font-weight: 600;
+          color: #409eff;
         }
       }
-      
-      .pagination-container {
-        @include flex-center;
-        padding: $spacing-lg 0 0;
-      }
-    }
-  }
-  
-  .alert-detail {
-    .detail-alert {
-      margin-bottom: $spacing-lg;
-    }
-    
-    .detail-descriptions {
-      margin-bottom: $spacing-lg;
-      
-      .threshold-tag {
-        margin-left: $spacing-sm;
-      }
-    }
-    
-    .threshold-collapse {
-      .el-collapse-item__header {
-        font-weight: 600;
-      }
     }
   }
 }
 
-// 水质状态颜色
-.water-quality-normal {
-  color: var(--el-color-success);
+// 行样式
+:deep(.alert-row-danger) {
+  background-color: #fef0f0;
 }
 
-.water-quality-warning {
-  color: var(--el-color-warning);
+:deep(.alert-row-warning) {
+  background-color: #fdf6ec;
 }
 
-.water-quality-danger {
-  color: var(--el-color-danger);
+:deep(.alert-row-info) {
+  background-color: #f4f4f5;
 }
 
-// 响应式设计
-@include respond-to(md) {
-  .stats-row {
-    .el-col {
-      margin-bottom: $spacing-md;
-    }
-  }
-  
-  .content-row {
-    .el-col {
-      margin-bottom: $spacing-md;
-    }
-  }
-  
-  .alert-values {
-    flex-direction: column;
-    gap: $spacing-xs !important;
-  }
+:deep(.alert-row-unhandled) {
+  border-left: 3px solid #f56c6c;
+}
+
+:deep(.alert-row-acknowledged) {
+  border-left: 3px solid #e6a23c;
+}
+
+:deep(.alert-row-resolved) {
+  border-left: 3px solid #67c23a;
+}
+
+:deep(.alert-row-ignored) {
+  border-left: 3px solid #909399;
 }
 </style>

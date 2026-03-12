@@ -13,7 +13,7 @@ class FileStorageServiceTest(TestCase):
         """测试插入和查找"""
         record = {
             'point_id': '测试点001',
-            'date': '2024-01-15',
+            'date': '2026-01-15',
             'time': '09:30',
             'chlorine': 2.5,
             'conductivity': 450.0,
@@ -35,7 +35,7 @@ class FileStorageServiceTest(TestCase):
         """测试更新"""
         record = {
             'point_id': '测试点002',
-            'date': '2024-01-16',
+            'date': '2026-01-16',
             'time': '10:30',
             'chlorine': 3.0,
             'conductivity': 500.0,
@@ -58,7 +58,7 @@ class FileStorageServiceTest(TestCase):
         """测试删除"""
         record = {
             'point_id': '测试点003',
-            'date': '2024-01-17',
+            'date': '2026-01-17',
             'time': '11:30',
             'chlorine': 1.5,
             'conductivity': 400.0,
@@ -87,8 +87,8 @@ class FileStorageServiceTest(TestCase):
         
         # 测试日期范围查询
         filters = {
-            'date_start': '2024-01-01',
-            'date_end': '2024-01-31'
+            'date_start': '2026-01-01',
+            'date_end': '2026-01-31'
         }
         results = self.storage.query(filters)
         self.assertGreater(len(results), 0)
@@ -128,7 +128,7 @@ class UtilsTest(TestCase):
         # 测试有效数据
         valid_data = {
             'point_id': '测试点',
-            'date': '2024-01-15',
+            'date': '2026-01-15',
             'time': '09:30',
             'chlorine': 2.5,
             'conductivity': 450.0,
@@ -142,7 +142,7 @@ class UtilsTest(TestCase):
         # 测试无效数据
         invalid_data = {
             'point_id': '',  # 空值
-            'date': '2024-01-15',
+            'date': '2026-01-15',
             'time': '09:30',
             'chlorine': -1.0,  # 负数
             'conductivity': 450.0,

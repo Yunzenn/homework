@@ -112,7 +112,7 @@
     </div>
 
     <div class="reset-password-footer">
-      <p>&copy; 2024 水质监控系统. 保留所有权利.</p>
+      <p>&copy; 2026 水质监控系统. 保留所有权利.</p>
     </div>
   </div>
 </template>

@@ -45,7 +45,10 @@ const router = createRouter({
       children: [
         {
           path: '/',
-          redirect: '/dashboard'
+          redirect: () => {
+            const authStore = useAuthStore()
+            return authStore.isAuthenticated ? '/dashboard' : '/enhanced-login'
+          }
         },
         {
           path: '/dashboard',

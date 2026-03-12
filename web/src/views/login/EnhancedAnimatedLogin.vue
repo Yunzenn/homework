@@ -243,7 +243,7 @@
         <span class="separator">|</span>
         <a href="#" class="footer-link">联系我们</a>
       </div>
-      <p class="copyright">&copy; 2024 水质监控系统. 保留所有权利.</p>
+      <p class="copyright">&copy; 2026 水质监控系统. 保留所有权利.</p>
     </div>
   </div>
 </template>
