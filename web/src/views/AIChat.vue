@@ -11,6 +11,7 @@
           <p class="page-subtitle">水质监控智能分析，即问即答</p>
         </div>
         <div class="header-right">
+          <el-button @click="showConfigDialog" :icon="Setting" circle title="AI配置" />
           <el-button @click="clearHistory" :icon="Delete" circle title="清空对话" />
           <el-button @click="exportChat" :icon="Download" circle title="导出对话" />
         </div>
@@ -25,6 +26,33 @@
           <div class="welcome-content">
             <div class="welcome-icon">👋</div>
             <h3>欢迎使用AI智能助手</h3>
+            
+            <!-- AI配置状态 -->
+            <div class="ai-status">
+              <el-alert 
+                :title="getAIStatusText()" 
+                :type="aiConfigStatus.type"
+                :closable="false"
+                show-icon
+                class="status-alert"
+              >
+                <template #default>
+                  <div class="status-content">
+                    <span>{{ aiConfigStatus.message }}</span>
+                    <el-button 
+                      v-if="!aiConfigStatus.configured"
+                      type="primary" 
+                      size="small" 
+                      @click="showConfigDialog"
+                      style="margin-left: 10px;"
+                    >
+                      立即配置
+                    </el-button>
+                  </div>
+                </template>
+              </el-alert>
+            </div>
+            
             <p>我可以帮您：</p>
             <ul class="capability-list">
               <li>📊 查询水质数据：如"P-042今天pH值多少？"</li>
@@ -267,13 +295,160 @@
         </div>
       </div>
     </div>
+
+    <!-- AI配置对话框 -->
+    <el-dialog 
+      v-model="configDialogVisible" 
+      title="AI模型配置" 
+      width="600px"
+      :before-close="handleConfigClose"
+    >
+      <el-form :model="aiConfig" :rules="configRules" ref="configForm" label-width="120px">
+        <!-- 模型类型选择 -->
+        <el-form-item label="模型类型" prop="modelType">
+          <el-radio-group v-model="aiConfig.modelType" @change="handleModelTypeChange">
+            <el-radio label="local">本地模型</el-radio>
+            <el-radio label="openai">OpenAI API</el-radio>
+            <el-radio label="claude">Claude API</el-radio>
+            <el-radio label="custom">自定义API</el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <!-- 本地模型配置 -->
+        <template v-if="aiConfig.modelType === 'local'">
+          <el-form-item label="服务地址" prop="localUrl">
+            <el-input 
+              v-model="aiConfig.localUrl" 
+              placeholder="http://localhost:8000/v1"
+            />
+          </el-form-item>
+          <el-form-item label="模型名称" prop="localModel">
+            <el-input 
+              v-model="aiConfig.localModel" 
+              placeholder="llama2"
+            />
+          </el-form-item>
+        </template>
+
+        <!-- OpenAI配置 -->
+        <template v-if="aiConfig.modelType === 'openai'">
+          <el-form-item label="API密钥" prop="openaiApiKey">
+            <el-input 
+              v-model="aiConfig.openaiApiKey" 
+              type="password"
+              placeholder="sk-..."
+              show-password
+            />
+          </el-form-item>
+          <el-form-item label="模型名称" prop="openaiModel">
+            <el-select v-model="aiConfig.openaiModel" placeholder="选择模型">
+              <el-option label="GPT-3.5 Turbo" value="gpt-3.5-turbo" />
+              <el-option label="GPT-4" value="gpt-4" />
+              <el-option label="GPT-4 Turbo" value="gpt-4-turbo" />
+            </el-select>
+          </el-form-item>
+        </template>
+
+        <!-- Claude配置 -->
+        <template v-if="aiConfig.modelType === 'claude'">
+          <el-form-item label="API密钥" prop="claudeApiKey">
+            <el-input 
+              v-model="aiConfig.claudeApiKey" 
+              type="password"
+              placeholder="sk-ant-..."
+              show-password
+            />
+          </el-form-item>
+          <el-form-item label="模型名称" prop="claudeModel">
+            <el-select v-model="aiConfig.claudeModel" placeholder="选择模型">
+              <el-option label="Claude 3 Sonnet" value="claude-3-sonnet-20240229" />
+              <el-option label="Claude 3 Haiku" value="claude-3-haiku-20240307" />
+              <el-option label="Claude 3 Opus" value="claude-3-opus-20240229" />
+            </el-select>
+          </el-form-item>
+        </template>
+
+        <!-- 自定义API配置 -->
+        <template v-if="aiConfig.modelType === 'custom'">
+          <el-form-item label="API地址" prop="customUrl">
+            <el-input 
+              v-model="aiConfig.customUrl" 
+              placeholder="http://your-api.com/v1"
+            />
+          </el-form-item>
+          <el-form-item label="API密钥" prop="customApiKey">
+            <el-input 
+              v-model="aiConfig.customApiKey" 
+              type="password"
+              placeholder="可选"
+              show-password
+            />
+          </el-form-item>
+          <el-form-item label="模型名称" prop="customModel">
+            <el-input 
+              v-model="aiConfig.customModel" 
+              placeholder="your-model-name"
+            />
+          </el-form-item>
+        </template>
+
+        <!-- 通用配置 -->
+        <el-form-item label="温度参数" prop="temperature">
+          <el-slider 
+            v-model="aiConfig.temperature" 
+            :min="0" 
+            :max="2" 
+            :step="0.1"
+            show-input
+            :show-input-controls="false"
+          />
+          <div class="form-help">
+            <small>控制生成文本的随机性，值越高越随机</small>
+          </div>
+        </el-form-item>
+
+        <el-form-item label="最大Token数" prop="maxTokens">
+          <el-input-number 
+            v-model="aiConfig.maxTokens" 
+            :min="100" 
+            :max="4000" 
+            :step="100"
+          />
+          <div class="form-help">
+            <small>限制AI回复的最大长度</small>
+          </div>
+        </el-form-item>
+      </el-form>
+
+      <!-- 连接测试 -->
+      <div class="config-test">
+        <el-button 
+          @click="testConnection" 
+          :loading="testingConnection"
+          type="primary"
+          plain
+        >
+          测试连接
+        </el-button>
+        <span v-if="testResult" :class="['test-result', testResult.success ? 'success' : 'error']">
+          {{ testResult.message }}
+        </span>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="configDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="saveConfig">保存配置</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, Download, Loading, ChatDotRound } from '@element-plus/icons-vue'
+import { Delete, Download, Loading, ChatDotRound, Setting } from '@element-plus/icons-vue'
 import { aiApi } from '@/api/ai'
 
 // 响应式数据
@@ -291,6 +466,48 @@ const quickExamples = ref([
   { text: '明天水质会超标吗？' },
   { text: 'pH超标怎么办？' }
 ])
+
+// AI配置相关
+const configDialogVisible = ref(false)
+const configForm = ref(null)
+const testingConnection = ref(false)
+const testResult = ref(null)
+
+// AI配置数据
+const aiConfig = reactive({
+  modelType: 'local',
+  localUrl: 'http://localhost:8000/v1',
+  localModel: 'llama2',
+  openaiApiKey: '',
+  openaiModel: 'gpt-3.5-turbo',
+  claudeApiKey: '',
+  claudeModel: 'claude-3-sonnet-20240229',
+  customUrl: '',
+  customApiKey: '',
+  customModel: '',
+  temperature: 0.7,
+  maxTokens: 2000
+})
+
+// AI配置状态
+const aiConfigStatus = reactive({
+  configured: false,
+  type: 'warning',
+  message: '尚未配置AI模型'
+})
+
+// 配置验证规则
+const configRules = {
+  modelType: [{ required: true, message: '请选择模型类型', trigger: 'change' }],
+  localUrl: [{ required: true, message: '请输入本地服务地址', trigger: 'blur' }],
+  localModel: [{ required: true, message: '请输入模型名称', trigger: 'blur' }],
+  openaiApiKey: [{ required: true, message: '请输入OpenAI API密钥', trigger: 'blur' }],
+  openaiModel: [{ required: true, message: '请选择OpenAI模型', trigger: 'change' }],
+  claudeApiKey: [{ required: true, message: '请输入Claude API密钥', trigger: 'blur' }],
+  claudeModel: [{ required: true, message: '请选择Claude模型', trigger: 'change' }],
+  customUrl: [{ required: true, message: '请输入自定义API地址', trigger: 'blur' }],
+  customModel: [{ required: true, message: '请输入模型名称', trigger: 'blur' }]
+}
 
 // 发送消息
 const sendMessage = async (messageText = null) => {
@@ -520,9 +737,174 @@ const exportChat = () => {
   ElMessage.success('对话记录已导出')
 }
 
+// AI配置相关方法
+const showConfigDialog = () => {
+  configDialogVisible.value = true
+  loadConfig()
+}
+
+const loadConfig = () => {
+  // 从localStorage加载配置
+  const savedConfig = localStorage.getItem('aiConfig')
+  if (savedConfig) {
+    try {
+      const config = JSON.parse(savedConfig)
+      Object.assign(aiConfig, config)
+    } catch (e) {
+      console.error('加载AI配置失败:', e)
+    }
+  }
+  checkAIStatus()
+}
+
+const saveConfig = async () => {
+  try {
+    // 验证表单
+    await configForm.value.validate()
+    
+    // 保存到localStorage
+    localStorage.setItem('aiConfig', JSON.stringify(aiConfig))
+    
+    // 更新状态
+    checkAIStatus()
+    
+    ElMessage.success('AI配置已保存')
+    configDialogVisible.value = false
+  } catch (error) {
+    console.error('保存配置失败:', error)
+  }
+}
+
+const handleModelTypeChange = (type) => {
+  // 清空测试结果
+  testResult.value = null
+  
+  // 根据类型更新验证规则
+  nextTick(() => {
+    configForm.value.clearValidate()
+  })
+}
+
+const testConnection = async () => {
+  testingConnection.value = true
+  testResult.value = null
+  
+  try {
+    let apiUrl, headers, testData
+    
+    switch (aiConfig.modelType) {
+      case 'local':
+        apiUrl = `${aiConfig.localUrl}/models`
+        headers = {}
+        break
+      case 'openai':
+        apiUrl = 'https://api.openai.com/v1/models'
+        headers = {
+          'Authorization': `Bearer ${aiConfig.openaiApiKey}`
+        }
+        break
+      case 'claude':
+        apiUrl = 'https://api.anthropic.com/v1/messages'
+        headers = {
+          'x-api-key': aiConfig.claudeApiKey,
+          'anthropic-version': '2023-06-01'
+        }
+        testData = {
+          model: aiConfig.claudeModel,
+          max_tokens: 10,
+          messages: [{ role: 'user', content: 'test' }]
+        }
+        break
+      case 'custom':
+        apiUrl = `${aiConfig.customUrl}/models`
+        headers = aiConfig.customApiKey ? {
+          'Authorization': `Bearer ${aiConfig.customApiKey}`
+        } : {}
+        break
+      default:
+        throw new Error('未知的模型类型')
+    }
+    
+    // 发送测试请求
+    const response = await fetch(apiUrl, {
+      method: aiConfig.modelType === 'claude' ? 'POST' : 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      },
+      body: aiConfig.modelType === 'claude' ? JSON.stringify(testData) : undefined
+    })
+    
+    if (response.status === 200 || response.status === 201) {
+      testResult.value = {
+        success: true,
+        message: '连接测试成功！'
+      }
+    } else {
+      const errorText = await response.text()
+      testResult.value = {
+        success: false,
+        message: `连接失败: ${response.status} - ${errorText.slice(0, 50)}`
+      }
+    }
+    
+  } catch (error) {
+    testResult.value = {
+      success: false,
+      message: `连接测试失败: ${error.message}`
+    }
+  } finally {
+    testingConnection.value = false
+  }
+}
+
+const checkAIStatus = () => {
+  // 检查AI配置状态
+  const hasConfig = (
+    (aiConfig.modelType === 'local' && aiConfig.localUrl && aiConfig.localModel) ||
+    (aiConfig.modelType === 'openai' && aiConfig.openaiApiKey && aiConfig.openaiModel) ||
+    (aiConfig.modelType === 'claude' && aiConfig.claudeApiKey && aiConfig.claudeModel) ||
+    (aiConfig.modelType === 'custom' && aiConfig.customUrl && aiConfig.customModel)
+  )
+  
+  if (hasConfig) {
+    aiConfigStatus.configured = true
+    aiConfigStatus.type = 'success'
+    aiConfigStatus.message = `已配置${getModelTypeName()}`
+  } else {
+    aiConfigStatus.configured = false
+    aiConfigStatus.type = 'warning'
+    aiConfigStatus.message = '尚未配置AI模型'
+  }
+}
+
+const getModelTypeName = () => {
+  const names = {
+    'local': '本地模型',
+    'openai': 'OpenAI API',
+    'claude': 'Claude API',
+    'custom': '自定义API'
+  }
+  return names[aiConfig.modelType] || '未知模型'
+}
+
+const getAIStatusText = () => {
+  if (aiConfigStatus.configured) {
+    return 'AI模型已就绪'
+  } else {
+    return '需要配置AI模型'
+  }
+}
+
+const handleConfigClose = () => {
+  configDialogVisible.value = false
+  testResult.value = null
+}
+
 // 组件挂载
 onMounted(() => {
   scrollToBottom()
+  loadConfig()
 })
 </script>
 
@@ -1028,5 +1410,77 @@ onMounted(() => {
     flex-direction: column;
     gap: 10px;
   }
+}
+
+/* AI配置相关样式 */
+.ai-status {
+  margin: 20px 0;
+}
+
+.status-alert {
+  border-radius: 12px;
+}
+
+.status-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.config-test {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #ebeef5;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.test-result {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.test-result.success {
+  color: #67c23a;
+}
+
+.test-result.error {
+  color: #f56c6c;
+}
+
+.form-help {
+  margin-top: 5px;
+  color: #909399;
+  font-size: 0.8rem;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* 配置对话框样式优化 */
+:deep(.el-dialog__body) {
+  padding: 20px 30px;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 600;
+  color: #303133;
+}
+
+:deep(.el-radio-group) {
+  display: flex;
+  gap: 20px;
+}
+
+:deep(.el-slider) {
+  margin-right: 20px;
+}
+
+:deep(.el-input-number) {
+  width: 150px;
 }
 </style>

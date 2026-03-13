@@ -187,13 +187,14 @@ const handleSubmit = async () => {
 .logo {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 12px;
   margin-bottom: 8px;
+  margin-left: -20px;
 }
 
 .logo h1 {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: #1f2937;
   margin: 0;

@@ -770,13 +770,15 @@ onUnmounted(() => {
 .logo {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 15px;
   margin-bottom: 8px;
+  margin-left: -40px;
+  margin-top: 10px;
 }
 
 .logo-icon {
-  font-size: 32px;
+  font-size: 48px;
   animation: bounce 2s ease-in-out infinite;
 }
 
@@ -786,7 +788,7 @@ onUnmounted(() => {
 }
 
 .brand-name {
-  font-size: 24px;
+  font-size: 32px;
   font-weight: 700;
   color: white;
   margin: 0;

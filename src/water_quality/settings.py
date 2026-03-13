@@ -151,6 +151,34 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
+# AI Agent Configuration
+AI_LOCAL_URL = 'http://localhost:8000/v1'
+AI_LOCAL_MODEL = 'local-model'
+AI_TEMPERATURE = 0.7
+AI_MAX_TOKENS = 2000
+AI_TIMEOUT = 30
+AI_ENABLE_FALLBACK = True
+AI_MAX_RETRIES = 3
+AI_CACHE_RESULTS = True
+AI_CACHE_TIMEOUT = 300
+
+# OpenAI Configuration (可选)
+# OPENAI_API_KEY = 'your-openai-api-key'
+# OPENAI_MODEL = 'gpt-3.5-turbo'
+
+# Claude Configuration (可选)
+# CLAUDE_API_KEY = 'your-claude-api-key'
+# CLAUDE_MODEL = 'claude-3-sonnet-20240229'
+
+# Agent Specific Configuration
+DATA_QUERY_MAX_RESULTS = 100
+DATA_QUERY_ENABLE_SUGGESTIONS = True
+ANALYSIS_DEPTH = 'standard'
+PREDICTION_DAYS = 7
+ANOMALY_THRESHOLD = 2.0
+REPORT_FORMAT = 'json'
+ADVISORY_RISK_LEVEL = 'medium'
+
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

@@ -7,37 +7,77 @@ import { get, post } from '@/utils/request'
 const aiApi = {
   // AI智能对话
   chat: (data) => {
-    return post('/ai/chat/', data)
+    // 添加用户配置到请求中
+    const config = this.getAIConfig()
+    return post('/ai/chat/', {
+      ...data,
+      ai_config: config
+    })
   },
 
   // 数据查询
   query: (data) => {
-    return post('/ai/query/', data)
+    const config = this.getAIConfig()
+    return post('/ai/query/', {
+      ...data,
+      ai_config: config
+    })
   },
 
   // 数据分析
   analysis: (data) => {
-    return post('/ai/analysis/', data)
+    const config = this.getAIConfig()
+    return post('/ai/analysis/', {
+      ...data,
+      ai_config: config
+    })
   },
 
   // 趋势预测
   prediction: (data) => {
-    return post('/ai/prediction/', data)
+    const config = this.getAIConfig()
+    return post('/ai/prediction/', {
+      ...data,
+      ai_config: config
+    })
   },
 
   // 异常检测
   anomaly: (data) => {
-    return post('/ai/anomaly/', data)
-  },
-
-  // 建议生成
-  advisory: (data) => {
-    return post('/ai/advisory/', data)
+    const config = this.getAIConfig()
+    return post('/ai/anomaly/', {
+      ...data,
+      ai_config: config
+    })
   },
 
   // 报告生成
   report: (data) => {
-    return post('/ai/report/', data)
+    const config = this.getAIConfig()
+    return post('/ai/report/', {
+      ...data,
+      ai_config: config
+    })
+  },
+
+  // 决策建议
+  advisory: (data) => {
+    const config = this.getAIConfig()
+    return post('/ai/advisory/', {
+      ...data,
+      ai_config: config
+    })
+  },
+
+  // 获取AI配置
+  getAIConfig: () => {
+    try {
+      const config = localStorage.getItem('aiConfig')
+      return config ? JSON.parse(config) : null
+    } catch (e) {
+      console.error('获取AI配置失败:', e)
+      return null
+    }
   },
 
   // 获取对话历史

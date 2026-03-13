@@ -176,10 +176,11 @@ watch(() => route.path, (newPath) => {
 }
 
 .header-left .logo {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   color: #1890ff;
   margin: 0;
+  margin-left: -10px;
 }
 
 .header-right {
