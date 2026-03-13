@@ -34,6 +34,11 @@
           <el-icon><Warning /></el-icon>
           <template #title>报警监控</template>
         </el-menu-item>
+        
+        <el-menu-item index="/ai-chat">
+          <el-icon><ChatDotRound /></el-icon>
+          <template #title>AI智能助手</template>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 

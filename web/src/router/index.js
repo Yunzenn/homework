@@ -7,6 +7,7 @@ import SimpleQuery from '@/views/SimpleQuery.vue'
 import BatchInput from '@/views/BatchInput.vue'
 import DataAnalysis from '@/views/DataAnalysis.vue'
 import Alerts from '@/views/Alerts.vue'
+import AIChat from '@/views/AIChat.vue'
 import EnhancedAnimatedLogin from '@/views/login/EnhancedAnimatedLogin.vue'
 import Register from '@/views/login/Register.vue'
 import ForgotPassword from '@/views/login/ForgotPassword.vue'
@@ -85,6 +86,12 @@ const router = createRouter({
           name: 'Alerts',
           component: Alerts,
           meta: { title: '报警监控', requiresAuth: true }
+        },
+        {
+          path: '/ai-chat',
+          name: 'AIChat',
+          component: AIChat,
+          meta: { title: 'AI智能助手', requiresAuth: true }
         }
       ]
     },

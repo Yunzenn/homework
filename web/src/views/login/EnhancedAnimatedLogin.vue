@@ -159,10 +159,10 @@
             </div>
           </el-form-item>
 
-          <!-- 开发环境测试账号提示 -->
-          <div v-if="isDevelopment" class="test-account-hint">
+          <!-- 测试账号提示 -->
+          <div class="test-account-hint">
             <el-alert
-              title="开发环境测试账号"
+              title="测试账号"
               type="info"
               :closable="false"
               show-icon
@@ -488,6 +488,7 @@ const handleInputFocus = (field) => {
   currentInputField.value = field
   showHintMessage('角色正在关注你的输入~', 'info')
   resetIdleTimer()
+  startIdleTimer()
 }
 
 // 处理输入框失焦
@@ -1331,6 +1332,20 @@ onUnmounted(() => {
     font-size: 11px;
     padding: 6px 12px;
   }
+}
+
+/* 测试账号提示样式 */
+.test-account-hint {
+  margin: 16px 0;
+}
+
+.test-account-info p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.test-account-info .el-button {
+  width: 100%;
 }
 
 /* 深色模式支持 */

@@ -63,6 +63,10 @@
             <span class="icon">⚠️</span>
             <span class="text" v-show="!sidebarCollapsed">报警监控</span>
           </a>
+          <a href="#" class="menu-item" :class="{ active: currentPath === '/ai-chat' }" @click="navigate('/ai-chat')">
+            <span class="icon">🤖</span>
+            <span class="text" v-show="!sidebarCollapsed">AI智能助手</span>
+          </a>
         </nav>
       </aside>
 

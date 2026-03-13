@@ -35,62 +35,14 @@ class LoginView(APIView):
     
     def post(self, request):
         """用户登录"""
-        from django.conf import settings
-        
-        # 开发环境测试账号检查
-        if settings.DEBUG:
-            username = request.data.get('username')
-            password = request.data.get('password')
-            
-            # 硬编码测试账号
-            if username == 'admin' and password == 'admin123':
-                # 创建测试用户信息（不存数据库）
-                test_user_data = {
-                    'id': 'test-admin-id',
-                    'username': 'admin',
-                    'email': 'admin@waterquality.com',
-                    'nickname': '系统管理员（测试）',
-                    'is_active': True,
-                    'roles': [{'name': '超级管理员', 'code': 'admin'}],
-                    'permissions': [
-                        'user.create', 'user.read', 'user.update', 'user.delete',
-                        'user.assign_role', 'user.lock_user',
-                        'role.create', 'role.read', 'role.update', 'role.delete',
-                        'role.assign_permission',
-                        'log.read', 'log.export',
-                        'system.manage', 'data.export'
-                    ]
-                }
-                
-                # 生成测试token
-                from rest_framework_simplejwt.tokens import RefreshToken
-                refresh = RefreshToken.for_user(User(
-                    id='test-admin-id',
-                    username='admin'
-                ))
-                
-                # 记录登录日志
-                from .utils import log_login, get_client_info
-                log_login(
-                    user=None,
-                    username=username,
-                    ip_address=get_client_info(request)['ip'],
-                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
-                    success=True
-                )
-                
-                return Response({
-                    'user': test_user_data,
-                    'token': str(refresh.access_token),
-                    'refresh_token': str(refresh),
-                    'is_test_account': True
-                }, status=status.HTTP_200_OK)
-        
-        # 生产环境正常登录流程
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
             remember = serializer.validated_data.get('remember', False)
+            
+            # 检查是否为测试账号
+            is_test_account = (user.username == 'admin' and 
+                             user.email == 'admin@example.com')
             
             # 记录登录信息
             from .utils import log_login, get_client_info
@@ -113,7 +65,7 @@ class LoginView(APIView):
                 'user': user_data,
                 'token': str(refresh.access_token),
                 'refresh_token': str(refresh),
-                'is_test_account': False
+                'is_test_account': is_test_account
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
