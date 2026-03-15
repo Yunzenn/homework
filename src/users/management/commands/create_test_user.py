@@ -3,7 +3,8 @@
 """
 
 from django.core.management.base import BaseCommand
-from users.models import User, Role, UserRole
+from django.contrib.auth.models import User
+from users.models import UserProfile
 
 class Command(BaseCommand):
     help = '创建测试用户admin'
@@ -17,17 +18,6 @@ class Command(BaseCommand):
                 )
                 return
 
-            # 创建或获取管理员角色
-            admin_role, created = Role.objects.get_or_create(
-                code='admin',
-                defaults={
-                    'name': '系统管理员',
-                    'description': '系统管理员角色，拥有所有权限',
-                    'permissions': ['all'],
-                    'is_system': True
-                }
-            )
-
             # 创建测试用户
             user = User.objects.create_user(
                 username='admin',
@@ -36,14 +26,15 @@ class Command(BaseCommand):
                 first_name='管理员',
                 last_name='系统',
                 is_staff=True,
-                is_superuser=True,
-                phone='13800138000'
+                is_superuser=True
             )
 
-            # 分配管理员角色
-            UserRole.objects.create(
+            # 创建用户档案
+            UserProfile.objects.create(
                 user=user,
-                role=admin_role
+                phone='13800138000',
+                department='系统管理',
+                position='系统管理员'
             )
 
             self.stdout.write(
@@ -51,7 +42,6 @@ class Command(BaseCommand):
             )
             self.stdout.write('用户名: admin')
             self.stdout.write('密码: admin123')
-            self.stdout.write('手机号: 13800138000')
 
         except Exception as e:
             self.stdout.write(

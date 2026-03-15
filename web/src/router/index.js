@@ -46,10 +46,7 @@ const router = createRouter({
       children: [
         {
           path: '/',
-          redirect: () => {
-            const authStore = useAuthStore()
-            return authStore.isAuthenticated ? '/dashboard' : '/enhanced-login'
-          }
+          redirect: '/dashboard'
         },
         {
           path: '/dashboard',
@@ -113,14 +110,20 @@ router.beforeEach((to, from, next) => {
   // 检查是否需要认证
   const requiresAuth = to.meta.requiresAuth !== false
   
+  // 如果访问根路径且未登录，直接跳转到登录页
+  if (to.path === '/' && !authStore.isAuthenticated) {
+    next('/enhanced-login')
+    return
+  }
+  
   if (requiresAuth && !authStore.isAuthenticated) {
     // 需要认证但未登录，跳转到登录页
     next({
       path: '/enhanced-login',
       query: { redirect: to.fullPath }
     })
-  } else if (!requiresAuth && authStore.isAuthenticated) {
-    // 不需要认证但已登录，跳转到主界面
+  } else if (!requiresAuth && authStore.isAuthenticated && to.path !== '/') {
+    // 不需要认证但已登录（且不是根路径），跳转到主界面
     next('/dashboard')
   } else if (to.path === '/enhanced-login' && authStore.isAuthenticated) {
     // 已登录用户访问登录页，跳转到主界面
