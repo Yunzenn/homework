@@ -8,7 +8,7 @@ const aiApi = {
   // AI智能对话
   chat: (data) => {
     // 添加用户配置到请求中
-    const config = this.getAIConfig()
+    const config = aiApi.getAIConfig()
     return post('/ai/chat/', {
       ...data,
       ai_config: config
@@ -17,7 +17,7 @@ const aiApi = {
 
   // 数据查询
   query: (data) => {
-    const config = this.getAIConfig()
+    const config = aiApi.getAIConfig()
     return post('/ai/query/', {
       ...data,
       ai_config: config
@@ -26,7 +26,7 @@ const aiApi = {
 
   // 数据分析
   analysis: (data) => {
-    const config = this.getAIConfig()
+    const config = aiApi.getAIConfig()
     return post('/ai/analysis/', {
       ...data,
       ai_config: config
@@ -35,7 +35,7 @@ const aiApi = {
 
   // 趋势预测
   prediction: (data) => {
-    const config = this.getAIConfig()
+    const config = aiApi.getAIConfig()
     return post('/ai/prediction/', {
       ...data,
       ai_config: config
@@ -44,7 +44,7 @@ const aiApi = {
 
   // 异常检测
   anomaly: (data) => {
-    const config = this.getAIConfig()
+    const config = aiApi.getAIConfig()
     return post('/ai/anomaly/', {
       ...data,
       ai_config: config
@@ -53,7 +53,7 @@ const aiApi = {
 
   // 报告生成
   report: (data) => {
-    const config = this.getAIConfig()
+    const config = aiApi.getAIConfig()
     return post('/ai/report/', {
       ...data,
       ai_config: config
@@ -62,7 +62,7 @@ const aiApi = {
 
   // 决策建议
   advisory: (data) => {
-    const config = this.getAIConfig()
+    const config = aiApi.getAIConfig()
     return post('/ai/advisory/', {
       ...data,
       ai_config: config
