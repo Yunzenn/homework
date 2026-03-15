@@ -227,14 +227,17 @@ class AuthView(APIView):
     def logout_user(self, request):
         """用户退出"""
         if request.user.is_authenticated:
-            # 记录操作日志
-            log_operation(
-                user=request.user,
-                action='LOGOUT',
-                module='auth',
-                description='用户退出',
-                ip_address=get_client_info(request)['ip']
-            )
+            # 记录操作日志（可选，如果出错可以注释掉）
+            try:
+                log_operation(
+                    user=request.user,
+                    action='LOGOUT',
+                    module='auth',
+                    description='用户退出',
+                    ip_address=get_client_info(request)['ip']
+                )
+            except Exception as e:
+                print(f"记录退出日志失败: {e}")
             
             # 删除token
             try:
