@@ -44,8 +44,8 @@ class EnhancedBaseAgent(ABC):
         """获取默认模型配置"""
         return ModelConfig(
             model_type=ModelType.LOCAL_LLM,
-            api_url="http://localhost:8000/v1",
-            model_name="local-model",
+            api_url="http://localhost:11434/v1",
+            model_name="qwen2.5-coder:7b",
             temperature=0.7,
             max_tokens=2000,
             timeout=30

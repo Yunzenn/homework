@@ -328,3 +328,47 @@ class EnhancedDataQueryAgent(EnhancedBaseAgent):
             "suggestions": self._generate_suggestions(results, conditions),
             "original_query": text
         }
+    
+    async def process_query(self, query: str, context: Dict = None) -> Dict:
+        """
+        处理用户查询
+        
+        Args:
+            query: 用户查询
+            context: 上下文信息
+            
+        Returns:
+            处理结果
+        """
+        try:
+            # 使用父类的process方法
+            response = await self.process(query, context or {})
+            
+            # 转换为字典格式
+            if response.success:
+                return {
+                    'success': True,
+                    'data': response.data,
+                    'confidence': response.confidence,
+                    'message': response.message,
+                    'agent': 'enhanced_data_query',
+                    'execution_time': response.execution_time,
+                    'model_used': response.model_used
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': response.message,
+                    'agent': 'enhanced_data_query',
+                    'confidence': 0.0,
+                    'error_details': response.error_details
+                }
+                
+        except Exception as e:
+            logger.error(f"处理查询失败: {str(e)}")
+            return {
+                'success': False,
+                'error': f'查询处理失败: {str(e)}',
+                'agent': 'enhanced_data_query',
+                'confidence': 0.0
+            }

@@ -55,20 +55,18 @@ class AgentManager:
     
     def _register_agents(self):
         """注册所有智能体"""
-        from .data_query_agent import DataQueryAgent
-        from .analysis_agent_simple import AnalysisAgent
-        from .advisory_agent import AdvisoryAgent
-        from .prediction_agent import PredictionAgent
-        from .anomaly_agent import AnomalyDetectionAgent
-        from .report_agent import ReportGenerationAgent
+        from .enhanced_data_query_agent import EnhancedDataQueryAgent
+        from .enhanced_agent import SmartAgentRouter
         
+        # 创建增强数据查询Agent
+        self.data_query_agent = EnhancedDataQueryAgent()
+        
+        # 创建智能路由器
+        self.router = SmartAgentRouter()
+        
+        # 注册到agents字典
         self.agents = {
-            AgentType.DATA_QUERY: DataQueryAgent(),
-            AgentType.ANALYSIS: AnalysisAgent(),
-            AgentType.PREDICTION: PredictionAgent(),
-            AgentType.ANOMALY_DETECTION: AnomalyDetectionAgent(),
-            AgentType.REPORT_GENERATION: ReportGenerationAgent(),
-            AgentType.ADVISORY: AdvisoryAgent(),
+            AgentType.DATA_QUERY: self.data_query_agent,
         }
     
     async def process_query(self, user_query: str, context: Dict = None) -> Dict:
@@ -82,19 +80,17 @@ class AgentManager:
         Returns:
             处理结果
         """
-        # 1. 意图识别
-        intent = await self._identify_intent(user_query)
-        
-        # 2. 任务分解
-        tasks = await self._decompose_task(user_query, intent, context)
-        
-        # 3. 并行执行任务
-        results = await self._execute_tasks(tasks)
-        
-        # 4. 结果融合
-        final_result = await self._synthesize_results(user_query, intent, results)
-        
-        return final_result
+        try:
+            # 使用增强数据查询Agent处理查询
+            result = await self.data_query_agent.process_query(user_query, context)
+            return result
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'查询处理失败: {str(e)}',
+                'agent': 'data_query',
+                'confidence': 0.0
+            }
     
     async def _identify_intent(self, query: str) -> AgentType:
         """识别用户意图"""

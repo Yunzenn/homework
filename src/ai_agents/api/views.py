@@ -32,6 +32,11 @@ def ai_chat(request):
         "context": {
             "user_id": "user123",
             "session_id": "session456"
+        },
+        "ai_config": {
+            "modelType": "local",
+            "localUrl": "http://localhost:11434/v1",
+            "localModel": "qwen2.5-coder:7b"
         }
     }
     """
@@ -39,6 +44,7 @@ def ai_chat(request):
         data = json.loads(request.body)
         message = data.get('message', '')
         context = data.get('context', {})
+        ai_config = data.get('ai_config', {})
         
         if not message:
             return Response({
@@ -51,9 +57,29 @@ def ai_chat(request):
         asyncio.set_event_loop(loop)
         
         try:
-            result = loop.run_until_complete(
-                agent_manager.process_query(message, context)
-            )
+            # 如果有用户配置，使用用户配置
+            if ai_config:
+                from ..core.enhanced_data_query_agent import EnhancedDataQueryAgent
+                from ..core.model_interface import ModelConfig, ModelType
+                
+                # 创建模型配置
+                model_config = ModelConfig(
+                    model_type=ModelType.LOCAL_LLM if ai_config.get('modelType') == 'local' else ModelType.OPENAI_API,
+                    api_url=ai_config.get('localUrl', 'http://localhost:11434/v1'),
+                    model_name=ai_config.get('localModel', 'qwen2.5-coder:7b'),
+                    temperature=ai_config.get('temperature', 0.7),
+                    max_tokens=ai_config.get('maxTokens', 2000),
+                    timeout=30
+                )
+                
+                # 创建Agent并处理
+                agent = EnhancedDataQueryAgent(model_config)
+                result = await agent.process_query(message, context)
+            else:
+                # 使用默认配置
+                result = loop.run_until_complete(
+                    agent_manager.process_query(message, context)
+                )
         finally:
             loop.close()
         
