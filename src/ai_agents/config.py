@@ -15,11 +15,11 @@ class AIConfig:
         """获取所有模型配置"""
         configs = {}
         
-        # 本地LLM配置
+        # 本地LLM配置 (Ollama)
         configs['local'] = ModelConfig(
             model_type=ModelType.LOCAL_LLM,
-            api_url=getattr(settings, 'AI_LOCAL_URL', 'http://localhost:8000/v1'),
-            model_name=getattr(settings, 'AI_LOCAL_MODEL', 'local-model'),
+            api_url=getattr(settings, 'AI_LOCAL_URL', 'http://localhost:11434/v1'),
+            model_name=getattr(settings, 'AI_LOCAL_MODEL', 'qwen2.5-coder:7b'),
             temperature=getattr(settings, 'AI_TEMPERATURE', 0.7),
             max_tokens=getattr(settings, 'AI_MAX_TOKENS', 2000),
             timeout=getattr(settings, 'AI_TIMEOUT', 30)

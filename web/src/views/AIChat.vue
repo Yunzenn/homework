@@ -319,13 +319,13 @@
           <el-form-item label="服务地址" prop="localUrl">
             <el-input 
               v-model="aiConfig.localUrl" 
-              placeholder="http://localhost:8000/v1"
+              placeholder="http://localhost:11434/v1"
             />
           </el-form-item>
           <el-form-item label="模型名称" prop="localModel">
             <el-input 
               v-model="aiConfig.localModel" 
-              placeholder="llama2"
+              placeholder="qwen2.5-coder:7b"
             />
           </el-form-item>
         </template>
@@ -476,8 +476,8 @@ const testResult = ref(null)
 // AI配置数据
 const aiConfig = reactive({
   modelType: 'local',
-  localUrl: 'http://localhost:8000/v1',
-  localModel: 'llama2',
+  localUrl: 'http://localhost:11434/v1',
+  localModel: 'qwen2.5-coder:7b',
   openaiApiKey: '',
   openaiModel: 'gpt-3.5-turbo',
   claudeApiKey: '',
@@ -794,7 +794,12 @@ const testConnection = async () => {
     
     switch (aiConfig.modelType) {
       case 'local':
-        apiUrl = `${aiConfig.localUrl}/models`
+        // Ollama使用不同的API端点
+        if (aiConfig.localUrl.includes('11434')) {
+          apiUrl = 'http://localhost:11434/api/tags'
+        } else {
+          apiUrl = `${aiConfig.localUrl}/models`
+        }
         headers = {}
         break
       case 'openai':

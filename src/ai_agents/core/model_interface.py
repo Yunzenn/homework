@@ -166,56 +166,87 @@ class LocalLLMModel(BaseModelInterface):
         self.api_url = config.api_url or "http://localhost:8000/v1"
         self.model_name = config.model_name or "local-model"
     
-    async def generate_text(self, prompt: str, context: Dict = None) -> str:
+    async def generate_text(self, prompt: str, context: Dict = None, **kwargs) -> str:
         """使用本地LLM生成文本"""
         try:
-            messages = []
-            
-            # 添加系统提示
-            if context and 'system_prompt' in context:
-                messages.append({"role": "system", "content": context['system_prompt']})
-            
-            # 添加用户提示
-            messages.append({"role": "user", "content": prompt})
-            
-            # 添加上下文
-            if context and 'context_data' in context:
-                messages.append({
-                    "role": "system", 
-                    "content": f"上下文信息：\n{json.dumps(context['context_data'], ensure_ascii=False, indent=2)}"
-                })
-            
-            headers = {
-                "Content-Type": "application/json"
-            }
-            
-            if self.config.custom_headers:
-                headers.update(self.config.custom_headers)
-            
-            data = {
-                "model": self.model_name,
-                "messages": messages,
-                "temperature": self.config.temperature,
-                "max_tokens": self.config.max_tokens
-            }
-            
-            response = requests.post(
-                f"{self.api_url}/chat/completions",
-                headers=headers,
-                json=data,
-                timeout=self.config.timeout
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                return result["choices"][0]["message"]["content"]
+            # 检查是否是Ollama API
+            if "11434" in self.api_url:
+                return await self._generate_ollama(prompt, context, **kwargs)
             else:
-                logger.error(f"本地LLM API错误: {response.status_code} - {response.text}")
-                return f"本地模型调用失败: {response.status_code}"
-                
+                return await self._generate_openai_format(prompt, context, **kwargs)
         except Exception as e:
             logger.error(f"本地LLM调用异常: {str(e)}")
             return f"本地模型调用异常: {str(e)}"
+    
+    async def _generate_ollama(self, prompt: str, context: Dict = None, **kwargs) -> str:
+        """使用Ollama API生成文本"""
+        # 提取Ollama的实际API地址
+        ollama_url = self.api_url.replace('/v1', '')
+        
+        # 构建完整的提示
+        full_prompt = prompt
+        if context and 'system_prompt' in context:
+            full_prompt = f"{context['system_prompt']}\n\n{prompt}"
+        if context and 'context_data' in context:
+            full_prompt += f"\n\n上下文信息：\n{json.dumps(context['context_data'], ensure_ascii=False, indent=2)}"
+        
+        data = {
+            "model": self.model_name,
+            "prompt": full_prompt,
+            "stream": False,
+            "options": {
+                "temperature": self.config.temperature,
+                "num_predict": self.config.max_tokens
+            }
+        }
+        
+        headers = {
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.post(
+            f"{ollama_url}/api/generate",
+            headers=headers,
+            json=data,
+            timeout=self.config.timeout
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result.get("response", "")
+        else:
+            logger.error(f"Ollama API错误: {response.status_code} - {response.text}")
+            return f"Ollama调用失败: {response.status_code}"
+    
+    async def _generate_openai_format(self, prompt: str, **kwargs) -> str:
+        """使用OpenAI格式API生成文本"""
+        data = {
+            "model": self.config.model_name,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": self.config.temperature,
+            "max_tokens": self.config.max_tokens
+        }
+        
+        headers = {
+            "Content-Type": "application/json"
+        }
+        
+        if self.config.custom_headers:
+            headers.update(self.config.custom_headers)
+        
+        response = requests.post(
+            f"{self.api_url}/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=self.config.timeout
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result["choices"][0]["message"]["content"]
+        else:
+            logger.error(f"本地LLM API错误: {response.status_code} - {response.text}")
+            return f"本地模型调用失败: {response.status_code}"
     
     async def generate_structured(self, prompt: str, schema: Dict) -> Dict:
         """生成结构化数据"""
@@ -243,7 +274,14 @@ JSON格式要求：
     def is_available(self) -> bool:
         """检查本地LLM是否可用"""
         try:
-            response = requests.get(f"{self.api_url}/models", timeout=10)
+            # 检查是否是Ollama API
+            if "11434" in self.api_url:
+                # Ollama使用不同的端点
+                ollama_url = self.api_url.replace('/v1', '')
+                response = requests.get(f"{ollama_url}/api/tags", timeout=10)
+            else:
+                # 其他本地LLM使用标准端点
+                response = requests.get(f"{self.api_url}/models", timeout=10)
             return response.status_code == 200
         except:
             return False
