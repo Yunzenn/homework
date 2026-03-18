@@ -6,9 +6,9 @@
         <div class="title-section">
           <h1 class="page-title">
             <span class="title-icon">📊</span>
-            批量数据录入
+            {{ isEditMode ? '编辑记录' : '批量数据录入' }}
           </h1>
-          <p class="page-subtitle">高效批量导入 · 智能验证 · 实时预览</p>
+          <p class="page-subtitle">{{ isEditMode ? '修改数据信息 · 智能验证' : '高效批量导入 · 智能验证 · 实时预览' }}</p>
         </div>
         <div class="header-stats">
           <div class="stat-card">
@@ -23,8 +23,8 @@
       </div>
     </div>
 
-    <!-- 输入方式选择 -->
-    <div class="method-selector">
+    <!-- 输入方式选择 - 只在非编辑模式显示 -->
+    <div v-if="!isEditMode" class="input-method-tabs">
       <div class="method-tabs">
         <div 
           class="tab-item" 
@@ -243,6 +243,7 @@
     <!-- 操作区域 -->
     <div class="actions-section">
       <div class="actions-container">
+        <!-- 数据验证 - 编辑模式下也显示 -->
         <div class="action-group">
           <h4>数据验证</h4>
           <div class="validation-summary">
@@ -261,7 +262,8 @@
           </div>
         </div>
         
-        <div class="action-group">
+        <!-- 批量操作 - 只在非编辑模式显示 -->
+        <div v-if="!isEditMode" class="action-group">
           <h4>批量操作</h4>
           <div class="batch-actions">
             <button class="batch-btn primary" @click="validateAllData" :disabled="tableData.length === 0">
@@ -282,6 +284,21 @@
             </button>
           </div>
         </div>
+        
+        <!-- 编辑操作 - 只在编辑模式显示 -->
+        <div v-if="isEditMode" class="action-group">
+          <h4>编辑操作</h4>
+          <div class="batch-actions">
+            <button class="batch-btn success" @click="updateRecord" :disabled="!isFormValid">
+              <span class="btn-icon">💾</span>
+              保存修改
+            </button>
+            <button class="batch-btn secondary" @click="router.push('/records')">
+              <span class="btn-icon">↩️</span>
+              返回列表
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -289,7 +306,15 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { waterQualityApi } from '@/api/waterQuality'
+
+const route = useRoute()
+const router = useRouter()
+
+// 检查是否为编辑模式
+const isEditMode = computed(() => !!route.params.id)
+const editRecordId = computed(() => route.params.id)
 
 // 输入方式
 const inputMethod = ref('table')
@@ -367,7 +392,11 @@ const isFormValid = computed(() => {
 // 验证方法
 const validateRowData = (row) => {
   return row.point_id && row.date && row.time && 
-         row.chlorine && row.conductivity && row.ph && row.orp && row.turbidity
+         row.chlorine !== null && row.chlorine !== '' && !isNaN(row.chlorine) &&
+         row.conductivity !== null && row.conductivity !== '' && !isNaN(row.conductivity) &&
+         row.ph !== null && row.ph !== '' && !isNaN(row.ph) &&
+         row.orp !== null && row.orp !== '' && !isNaN(row.orp) &&
+         row.turbidity !== null && row.turbidity !== '' && !isNaN(row.turbidity)
 }
 
 const validateField = (key) => {
@@ -395,7 +424,19 @@ const getRowClass = (row) => {
 // 操作方法
 const addSingleRecord = () => {
   if (isFormValid.value) {
-    tableData.value.push({ ...singleRecord.value })
+    // 转换数据类型
+    const record = {
+      point_id: singleRecord.value.point_id,
+      date: singleRecord.value.date,
+      time: singleRecord.value.time,
+      chlorine: parseFloat(singleRecord.value.chlorine),
+      conductivity: parseFloat(singleRecord.value.conductivity),
+      ph: parseFloat(singleRecord.value.ph),
+      orp: parseFloat(singleRecord.value.orp),
+      turbidity: parseFloat(singleRecord.value.turbidity)
+    }
+    
+    tableData.value.push(record)
     clearSingleRecord()
   }
 }
@@ -411,11 +452,11 @@ const addTableRow = () => {
     point_id: '',
     date: new Date().toISOString().split('T')[0],
     time: new Date().toTimeString().slice(0, 5),
-    chlorine: '',
-    conductivity: '',
-    ph: '',
-    orp: '',
-    turbidity: ''
+    chlorine: 0,
+    conductivity: 0,
+    ph: 0,
+    orp: 0,
+    turbidity: 0
   }
   tableData.value.push(newRow)
 }
@@ -518,6 +559,30 @@ const validateAllData = () => {
   })
 }
 
+const updateRecord = async () => {
+  try {
+    // 转换数据类型
+    const convertedRecord = {
+      point_id: singleRecord.value.point_id,
+      date: singleRecord.value.date,
+      time: singleRecord.value.time,
+      chlorine: parseFloat(singleRecord.value.chlorine),
+      conductivity: parseFloat(singleRecord.value.conductivity),
+      ph: parseFloat(singleRecord.value.ph),
+      orp: parseFloat(singleRecord.value.orp),
+      turbidity: parseFloat(singleRecord.value.turbidity)
+    }
+    
+    await waterQualityApi.updateRecord(editRecordId.value, convertedRecord)
+    alert('记录更新成功！')
+    router.push('/records')
+  } catch (error) {
+    console.error('记录更新失败:', error)
+    const errorMsg = error.response?.data?.detail || error.message || '未知错误'
+    alert('更新失败: ' + errorMsg)
+  }
+}
+
 const submitBatchData = async () => {
   try {
     const validData = tableData.value.filter(row => validateRowData(row))
@@ -533,7 +598,19 @@ const submitBatchData = async () => {
     
     for (const [index, record] of validData.entries()) {
       try {
-        await waterQualityApi.createRecord(record)
+        // 转换数据类型
+        const convertedRecord = {
+          point_id: record.point_id,
+          date: record.date,
+          time: record.time,
+          chlorine: parseFloat(record.chlorine),
+          conductivity: parseFloat(record.conductivity),
+          ph: parseFloat(record.ph),
+          orp: parseFloat(record.orp),
+          turbidity: parseFloat(record.turbidity)
+        }
+        
+        await waterQualityApi.createRecord(convertedRecord)
         successCount++
       } catch (error) {
         errorCount++
@@ -616,8 +693,38 @@ const validateRow = (index) => {
   tableData.value[index].isValid = validateRowData(tableData.value[index])
 }
 
+const loadEditRecord = async () => {
+  if (isEditMode.value && editRecordId.value) {
+    try {
+      const response = await waterQualityApi.getRecord(editRecordId.value)
+      const record = response
+      
+      // 填充到表单
+      singleRecord.value = {
+        point_id: record.point_id,
+        date: record.date,
+        time: record.time,
+        chlorine: record.chlorine.toString(),
+        conductivity: record.conductivity.toString(),
+        ph: record.ph.toString(),
+        orp: record.orp.toString(),
+        turbidity: record.turbidity.toString()
+      }
+      
+      // 切换到手动输入模式
+      inputMethod.value = 'manual'
+      
+    } catch (error) {
+      console.error('加载记录失败:', error)
+      alert('加载记录失败，请返回重试')
+      router.push('/records')
+    }
+  }
+}
+
 onMounted(() => {
   // 初始化
+  loadEditRecord()
 })
 </script>
 

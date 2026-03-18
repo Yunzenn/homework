@@ -1232,7 +1232,7 @@ const handleExport = async (format) => {
 }
 
 const editRecord = (record) => {
-  router.push(`/records/edit/${record.id}`)
+  router.push(`/batch-input/${record.id}`)
 }
 
 const deleteRecord = async (record) => {

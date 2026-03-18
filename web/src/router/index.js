@@ -67,6 +67,12 @@ const router = createRouter({
           meta: { title: '数据录入', requiresAuth: true }
         },
         {
+          path: '/batch-input/:id',
+          name: 'BatchInputEdit',
+          component: BatchInput,
+          meta: { title: '编辑记录', requiresAuth: true }
+        },
+        {
           path: '/query',
           name: 'Query',
           component: SimpleQuery,

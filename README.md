@@ -53,29 +53,10 @@ homework/
 │   │   ├── stores/        # 状态管理
 │   │   └── utils/         # 工具函数
 │   └── package.json
-├── start.bat               # Windows 启动脚本
-├── start.ps1               # PowerShell 启动脚本
-├── start.sh                # Linux/macOS 启动脚本
 └── README.md
 ```
 
 ## 🚀 启动方式
-
-### 🎯 一键启动 (推荐)
-
-```bash
-# Windows
-start.bat
-
-# 或使用PowerShell
-start.ps1
-
-# Linux/macOS
-chmod +x start.sh
-./start.sh
-```
-
-### 🔧 手动启动
 
 #### 环境要求
 - Python 3.8+
