@@ -190,6 +190,15 @@
           筛选
         </el-button>
       </div>
+      
+      <!-- 调试信息 -->
+      <div style="margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 4px;">
+        <small>调试信息:</small><br>
+        <small>当前页: {{ currentPage }}</small><br>
+        <small>日期范围: {{ dateRange }}</small><br>
+        <small>监测点: {{ selectedPoints }}</small><br>
+        <small>状态: {{ selectedStatus }}</small>
+      </div>
     </div>
 
     <!-- 主内容区域 -->
@@ -737,6 +746,58 @@
         <el-button type="primary" @click="saveTag">保存标注</el-button>
       </template>
     </el-dialog>
+
+    <!-- 对比记录选择器 -->
+    <el-dialog v-model="showCompareSelector" title="选择对比记录" width="800px">
+      <div class="compare-selector">
+        <div class="selector-content">
+          <div class="available-records">
+            <h4>可用记录</h4>
+            <div class="records-list">
+              <div 
+                v-for="record in records" 
+                :key="record.id"
+                class="record-item"
+                :class="{ selected: compareRecords.value.some(r => r.id === record.id) }"
+                @click="toggleCompareRecord(record)"
+              >
+                <div class="record-info">
+                  <span class="record-point">{{ record.point_id }}</span>
+                  <span class="record-time">{{ record.date }} {{ record.time }}</span>
+                </div>
+                <div class="record-status">
+                  <el-tag :type="getStatusTagType(record.status)" size="small">
+                    {{ getStatusText(record.status) }}
+                  </el-tag>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="selected-records">
+            <h4>已选择记录 ({{ compareRecords.value.length }}/2)</h4>
+            <div class="selected-list">
+              <div 
+                v-for="record in compareRecords.value" 
+                :key="record.id"
+                class="selected-item"
+              >
+                <span>{{ record.point_id }} - {{ record.date }} {{ record.time }}</span>
+                <el-button type="text" size="small" @click="removeCompareRecord(record.id)">
+                  <el-icon><Close /></el-icon>
+                </el-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="showCompareSelector = false">取消</el-button>
+        <el-button type="primary" @click="confirmCompareSelection" :disabled="compareRecords.value.length < 2">
+          确认选择 ({{ compareRecords.value.length }}/2)
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -1109,11 +1170,20 @@ const shareSnapshot = () => {
 }
 
 const applyFilters = () => {
+  console.log('applyFilters 被调用')
+  console.log('当前筛选条件:', {
+    dateRange: dateRange.value,
+    selectedPoints: selectedPoints.value,
+    selectedStatus: selectedStatus.value
+  })
+  
   currentPage.value = 1
   loadRecords()
 }
 
 const resetFilters = () => {
+  console.log('resetFilters 被调用')
+  
   dateRange.value = []
   selectedPoints.value = []
   selectedMetrics.value = []
@@ -1580,12 +1650,40 @@ const calculateDifference = (metric) => {
   return Math.max(...values) - Math.min(...values)
 }
 
-const updateCompareSelection = () => {
-  // 更新对比选择
+const toggleCompareRecord = (record) => {
+  const index = compareRecords.value.findIndex(r => r.id === record.id)
+  if (index > -1) {
+    // 如果已选择，则移除
+    compareRecords.value.splice(index, 1)
+  } else {
+    // 如果未选择，则添加
+    if (compareRecords.value.length < 5) { // 限制最多选择5条
+      compareRecords.value.push({
+        ...record,
+        selected: true
+      })
+    } else {
+      ElMessage.warning('最多只能选择5条记录进行对比')
+    }
+  }
 }
 
-const removeCompareRecord = (index) => {
-  compareRecords.value.splice(index, 1)
+const confirmCompareSelection = () => {
+  if (compareRecords.value.length >= 2) {
+    showCompareSelector.value = false
+    ElMessage.success(`已选择${compareRecords.value.length}条记录进行对比`)
+  }
+}
+
+const removeCompareRecord = (recordId) => {
+  const index = compareRecords.value.findIndex(r => r.id === recordId)
+  if (index > -1) {
+    compareRecords.value.splice(index, 1)
+  }
+}
+
+const updateCompareSelection = () => {
+  // 更新对比选择
 }
 
 const generateCompareReport = () => {
@@ -1647,6 +1745,87 @@ onMounted(() => {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 对比选择器样式 */
+.compare-selector {
+  max-height: 500px;
+}
+
+.selector-content {
+  display: flex;
+  gap: 20px;
+}
+
+.available-records {
+  flex: 1;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.records-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.record-item {
+  padding: 12px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.record-item:hover {
+  border-color: #409eff;
+  background: #f0f9ff;
+}
+
+.record-item.selected {
+  border-color: #409eff;
+  background: #e6f7ff;
+}
+
+.record-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.record-point {
+  font-weight: 600;
+  color: #303133;
+}
+
+.record-time {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.selected-records {
+  flex: 1;
+}
+
+.selected-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.selected-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border: 1px solid #409eff;
+  border-radius: 6px;
+  font-size: 0.9rem;
 }
 
 .page-title {
