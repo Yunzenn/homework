@@ -794,11 +794,11 @@ const testConnection = async () => {
     
     switch (aiConfig.modelType) {
       case 'local':
-        // Ollama使用不同的API端点
-        if (aiConfig.localUrl.includes('11434')) {
-          apiUrl = 'http://localhost:11434/api/tags'
-        } else {
-          apiUrl = `${aiConfig.localUrl}/models`
+        // 使用专门的Ollama测试接口
+        apiUrl = '/api/ai/test-ollama/'
+        testData = {
+          model: aiConfig.localModel,
+          prompt: '你好，请回复一个简单的问候'
         }
         headers = {}
         break
@@ -827,35 +827,57 @@ const testConnection = async () => {
         } : {}
         break
       default:
-        throw new Error('未知的模型类型')
+        throw new Error('不支持的模型类型')
     }
     
-    // 发送测试请求
-    const response = await fetch(apiUrl, {
-      method: aiConfig.modelType === 'claude' ? 'POST' : 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers
-      },
-      body: aiConfig.modelType === 'claude' ? JSON.stringify(testData) : undefined
-    })
+    let response
+    if (aiConfig.modelType === 'local') {
+      // 使用POST请求测试Ollama
+      response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers
+        },
+        body: JSON.stringify(testData)
+      })
+    } else {
+      // 其他模型使用GET请求
+      response = await fetch(apiUrl, { headers })
+    }
     
-    if (response.status === 200 || response.status === 201) {
-      testResult.value = {
-        success: true,
-        message: '连接测试成功！'
+    if (response.ok) {
+      const data = await response.json()
+      
+      if (aiConfig.modelType === 'local') {
+        // Ollama测试成功
+        if (data.success) {
+          testResult.value = {
+            type: 'success',
+            message: `连接成功！模型: ${data.data.model}, 响应: ${data.data.response.substring(0, 50)}...`
+          }
+        } else {
+          testResult.value = {
+            type: 'error',
+            message: `连接失败: ${data.error}`
+          }
+        }
+      } else {
+        testResult.value = {
+          type: 'success',
+          message: '连接测试成功！'
+        }
       }
     } else {
       const errorText = await response.text()
       testResult.value = {
-        success: false,
-        message: `连接失败: ${response.status} - ${errorText.slice(0, 50)}`
+        type: 'error',
+        message: `连接失败: ${response.status} - ${errorText}`
       }
     }
-    
   } catch (error) {
     testResult.value = {
-      success: false,
+      type: 'error',
       message: `连接测试失败: ${error.message}`
     }
   } finally {

@@ -1155,11 +1155,11 @@ const handleCurrentChange = (page) => {
 }
 
 const handleAdd = () => {
-  router.push('/records/add')
+  router.push('/batch-input')
 }
 
 const handleBatchUpload = () => {
-  router.push('/records/batch-upload')
+  router.push('/batch-input')
 }
 
 const handleBatchDelete = async () => {

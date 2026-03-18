@@ -1,83 +1,85 @@
-import axios from 'axios'
-
-// 创建axios实例
-const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  }
-})
-
-// 请求拦截器
-api.interceptors.request.use(
-  (config) => {
-    console.log('API Request:', config.method?.toUpperCase(), config.url)
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
-
-// 响应拦截器
-api.interceptors.response.use(
-  (response) => {
-    console.log('API Response:', response.status, response.config.url)
-    return response.data
-  },
-  (error) => {
-    console.error('API Error:', error.response?.status, error.response?.data || error.message)
-    return Promise.reject(error)
-  }
-)
+import { request, get, post, put, del } from '@/utils/request'
 
 // 水质记录API
 export const waterQualityApi = {
   // 获取记录列表
   getRecords: (params = {}) => {
-    return api.get('/records/', { params })
+    return request({
+      url: '/records/',
+      method: 'GET',
+      params
+    })
   },
 
   // 获取单条记录
   getRecord: (id) => {
-    return api.get(`/records/${id}/`)
+    return request({
+      url: `/records/${id}/`,
+      method: 'GET'
+    })
   },
 
   // 创建记录
   createRecord: (data) => {
-    return api.post('/records/', data)
+    return request({
+      url: '/records/',
+      method: 'POST',
+      data
+    })
   },
 
   // 更新记录
   updateRecord: (id, data) => {
-    return api.put(`/records/${id}/`, data)
+    return request({
+      url: `/records/${id}/`,
+      method: 'PUT',
+      data
+    })
   },
 
   // 删除记录
   deleteRecord: (id) => {
-    return api.delete(`/records/${id}/`)
+    return request({
+      url: `/records/${id}/`,
+      method: 'DELETE'
+    })
   },
 
   // 批量删除记录
   batchDeleteRecords: (recordIds) => {
-    return api.post('/records/batch_delete/', { record_ids: recordIds })
+    return request({
+      url: '/records/batch_delete/',
+      method: 'POST',
+      data: { record_ids: recordIds }
+    })
   },
 
   // 导出记录
   exportRecords: (params = {}) => {
-    return api.get('/records/export/', { params, responseType: 'blob' })
+    return request({
+      url: '/records/export/',
+      method: 'GET',
+      params,
+      responseType: 'blob'
+    })
   },
 
   // 获取统计数据
   getStats: () => {
-    return api.get('/stats/')
+    return request({
+      url: '/stats/',
+      method: 'GET'
+    })
   },
 
   // 获取报警数据
   getAlerts: (params = {}) => {
-    return api.get('/alerts/', { params })
+    return request({
+      url: '/alerts/',
+      method: 'GET',
+      params
+    })
   }
 }
 
-export default api
+export default request

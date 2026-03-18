@@ -522,15 +522,47 @@ const submitBatchData = async () => {
   try {
     const validData = tableData.value.filter(row => validateRowData(row))
     
-    for (const record of validData) {
-      await waterQualityApi.createRecord(record)
+    if (validData.length === 0) {
+      alert('没有有效数据可以提交！')
+      return
     }
     
-    alert(`成功提交 ${validData.length} 条记录！`)
-    clearTable()
+    let successCount = 0
+    let errorCount = 0
+    const errorDetails = []
+    
+    for (const [index, record] of validData.entries()) {
+      try {
+        await waterQualityApi.createRecord(record)
+        successCount++
+      } catch (error) {
+        errorCount++
+        const errorMsg = error.response?.data?.detail || error.message || '未知错误'
+        errorDetails.push(`第${index + 1}条: ${errorMsg}`)
+        console.error(`记录提交失败:`, record, error)
+      }
+    }
+    
+    if (successCount > 0) {
+      // 移除成功提交的数据
+      tableData.value = tableData.value.filter(row => !validData.includes(row))
+      
+      let message = `成功提交 ${successCount} 条记录！`
+      if (errorCount > 0) {
+        message += `\n失败 ${errorCount} 条记录。`
+        if (errorDetails.length <= 3) {
+          message += `\n错误详情:\n${errorDetails.join('\n')}`
+        } else {
+          message += `\n部分错误:\n${errorDetails.slice(0, 3).join('\n')}...`
+        }
+      }
+      alert(message)
+    } else {
+      alert(`提交失败！\n${errorDetails.join('\n')}`)
+    }
   } catch (error) {
-    console.error('提交数据失败:', error)
-    alert('提交失败，请检查数据格式')
+    console.error('批量提交失败:', error)
+    alert('提交过程中发生异常，请检查网络连接或联系管理员')
   }
 }
 

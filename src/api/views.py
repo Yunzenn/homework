@@ -169,6 +169,142 @@ class WaterQualityRecordViewSet(viewsets.ModelViewSet):
         })
     
     @action(detail=False, methods=['get'])
+    def alerts(self, request):
+        """获取报警数据"""
+        # 获取查询参数
+        date_after = request.query_params.get('date_after')
+        date_before = request.query_params.get('date_before')
+        point_id = request.query_params.get('point_id')
+        limit = int(request.query_params.get('limit', 50))
+        
+        # 获取报警记录
+        alert_records = WaterQualityRecord.get_alert_records()
+        
+        # 应用过滤条件
+        if date_after:
+            alert_records = alert_records.filter(date__gte=date_after)
+        if date_before:
+            alert_records = alert_records.filter(date__lte=date_before)
+        if point_id:
+            alert_records = alert_records.filter(point_id__icontains=point_id)
+        
+        # 限制数量并排序
+        alert_records = alert_records.order_by('-date', '-time')[:limit]
+        
+        # 序列化数据
+        serializer = self.get_serializer(alert_records, many=True)
+        
+        # 统计报警类型
+        alert_stats = {
+            'chlorine': 0,
+            'conductivity': 0,
+            'ph': 0,
+            'orp': 0,
+            'turbidity': 0
+        }
+        
+        alert_data = []
+        for record in alert_records:
+            alert_info = record.is_alert
+            alert_data.append({
+                'id': record.id,
+                'point_id': record.point_id,
+                'date': record.date,
+                'time': record.time,
+                'alert_items': alert_info['alert_items'],
+                'chlorine': record.chlorine,
+                'conductivity': record.conductivity,
+                'ph': record.ph,
+                'orp': record.orp,
+                'turbidity': record.turbidity,
+                'created_at': record.created_at
+            })
+            
+            # 统计各类型报警数量
+            for item in alert_info['alert_items']:
+                if item in alert_stats:
+                    alert_stats[item] += 1
+        
+        return Response({
+            'alerts': alert_data,
+            'total_count': len(alert_data),
+            'alert_stats': alert_stats,
+            'summary': {
+                'total_alerts': len(alert_data),
+                'unique_points': len(set(r['point_id'] for r in alert_data)),
+                'most_common_alert': max(alert_stats.items(), key=lambda x: x[1])[0] if any(alert_stats.values()) else None
+            }
+        })
+    
+    @action(detail=False, methods=['get'])
+    def stats(self, request):
+        """获取统计数据"""
+        # 基础统计
+        total_records = WaterQualityRecord.objects.count()
+        total_points = WaterQualityRecord.objects.values('point_id').distinct().count()
+        
+        # 报警统计
+        alert_records = WaterQualityRecord.get_alert_records()
+        alert_count = alert_records.count()
+        
+        # 平均值统计
+        stats = WaterQualityRecord.objects.aggregate(
+            avg_chlorine=Avg('chlorine'),
+            avg_conductivity=Avg('conductivity'),
+            avg_ph=Avg('ph'),
+            avg_orp=Avg('orp'),
+            avg_turbidity=Avg('turbidity'),
+            max_chlorine=Max('chlorine'),
+            max_conductivity=Max('conductivity'),
+            max_ph=Max('ph'),
+            max_orp=Max('orp'),
+            max_turbidity=Max('turbidity'),
+            min_chlorine=Min('chlorine'),
+            min_conductivity=Min('conductivity'),
+            min_ph=Min('ph'),
+            min_orp=Min('orp'),
+            min_turbidity=Min('turbidity'),
+        )
+        
+        # 最近更新时间
+        latest_record = WaterQualityRecord.objects.order_by('-created_at').first()
+        
+        return Response({
+            'total_records': total_records,
+            'total_points': total_points,
+            'alert_count': alert_count,
+            'alert_rate': round((alert_count / total_records * 100), 2) if total_records > 0 else 0,
+            'statistics': {
+                'chlorine': {
+                    'avg': round(stats['avg_chlorine'], 2) if stats['avg_chlorine'] else 0,
+                    'max': round(stats['max_chlorine'], 2) if stats['max_chlorine'] else 0,
+                    'min': round(stats['min_chlorine'], 2) if stats['min_chlorine'] else 0,
+                },
+                'conductivity': {
+                    'avg': round(stats['avg_conductivity'], 2) if stats['avg_conductivity'] else 0,
+                    'max': round(stats['max_conductivity'], 2) if stats['max_conductivity'] else 0,
+                    'min': round(stats['min_conductivity'], 2) if stats['min_conductivity'] else 0,
+                },
+                'ph': {
+                    'avg': round(stats['avg_ph'], 2) if stats['avg_ph'] else 0,
+                    'max': round(stats['max_ph'], 2) if stats['max_ph'] else 0,
+                    'min': round(stats['min_ph'], 2) if stats['min_ph'] else 0,
+                },
+                'orp': {
+                    'avg': round(stats['avg_orp'], 2) if stats['avg_orp'] else 0,
+                    'max': round(stats['max_orp'], 2) if stats['max_orp'] else 0,
+                    'min': round(stats['min_orp'], 2) if stats['min_orp'] else 0,
+                },
+                'turbidity': {
+                    'avg': round(stats['avg_turbidity'], 2) if stats['avg_turbidity'] else 0,
+                    'max': round(stats['max_turbidity'], 2) if stats['max_turbidity'] else 0,
+                    'min': round(stats['min_turbidity'], 2) if stats['min_turbidity'] else 0,
+                },
+            },
+            'latest_update': latest_record.created_at if latest_record else None
+        })
+    
+    @action(detail=False, methods=['get'])
     def dashboard_data(self, request):
         """仪表盘数据"""
         # 基础统计

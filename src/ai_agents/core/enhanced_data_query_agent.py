@@ -55,6 +55,8 @@ class EnhancedDataQueryAgent(EnhancedBaseAgent):
     
     async def _prepare_context(self, parameters: Dict) -> Dict:
         """准备上下文数据"""
+        from asgiref.sync import sync_to_async
+        
         context = {}
         
         # 获取数据库结构信息
@@ -76,93 +78,112 @@ class EnhancedDataQueryAgent(EnhancedBaseAgent):
         }
         
         # 获取最近的样本数据
-        try:
-            recent_records = WaterQualityRecord.objects.all()[:5]
-            context['sample_data'] = [
-                {
-                    "location": record.location,
-                    "ph_value": record.ph_value,
-                    "dissolved_oxygen": record.dissolved_oxygen,
-                    "turbidity": record.turbidity,
-                    "temperature": record.temperature,
-                    "record_time": record.record_time.isoformat()
-                }
-                for record in recent_records
-            ]
-        except Exception as e:
-            logger.error(f"获取样本数据失败: {str(e)}")
-            context['sample_data'] = []
+        @sync_to_async
+        def get_sample_data():
+            try:
+                recent_records = WaterQualityRecord.objects.all()[:5]
+                return [
+                    {
+                        "location": record.location,
+                        "ph_value": record.ph_value,
+                        "dissolved_oxygen": record.dissolved_oxygen,
+                        "turbidity": record.turbidity,
+                        "temperature": record.temperature,
+                        "record_time": record.record_time.isoformat()
+                    }
+                    for record in recent_records
+                ]
+            except Exception as e:
+                logger.error(f"获取样本数据失败: {str(e)}")
+                return []
+        
+        context['sample_data'] = await get_sample_data()
         
         # 获取统计信息
-        try:
-            total_count = WaterQualityRecord.objects.count()
-            context['statistics'] = {
-                "total_records": total_count,
-                "locations": list(WaterQualityRecord.objects.values_list('location', flat=True).distinct())
-            }
-        except Exception as e:
-            logger.error(f"获取统计信息失败: {str(e)}")
-            context['statistics'] = {"total_records": 0, "locations": []}
+        @sync_to_async
+        def get_statistics():
+            try:
+                total_count = WaterQualityRecord.objects.count()
+                locations = list(WaterQualityRecord.objects.values_list('location', flat=True).distinct())
+                return {
+                    "total_records": total_count,
+                    "locations": locations
+                }
+            except Exception as e:
+                logger.error(f"获取统计信息失败: {str(e)}")
+                return {"total_records": 0, "locations": []}
+        
+        context['statistics'] = await get_statistics()
         
         return context
     
     async def _execute_query(self, conditions: Dict) -> List[Dict]:
         """执行数据查询"""
         try:
-            queryset = WaterQualityRecord.objects.all()
+            from django.db import connection
+            from asgiref.sync import sync_to_async
             
-            # 应用查询条件
-            if 'location' in conditions:
-                queryset = queryset.filter(location__icontains=conditions['location'])
+            # 使用sync_to_async包装同步ORM操作
+            @sync_to_async
+            def get_queryset():
+                queryset = WaterQualityRecord.objects.all()
+                
+                # 应用查询条件
+                if 'location' in conditions:
+                    queryset = queryset.filter(location__icontains=conditions['location'])
+                
+                if 'ph_min' in conditions:
+                    queryset = queryset.filter(ph_value__gte=conditions['ph_min'])
+                
+                if 'ph_max' in conditions:
+                    queryset = queryset.filter(ph_value__lte=conditions['ph_max'])
+                
+                if 'do_min' in conditions:
+                    queryset = queryset.filter(dissolved_oxygen__gte=conditions['do_min'])
+                
+                if 'do_max' in conditions:
+                    queryset = queryset.filter(dissolved_oxygen__lte=conditions['do_max'])
+                
+                if 'turbidity_max' in conditions:
+                    queryset = queryset.filter(turbidity__lte=conditions['turbidity_max'])
+                
+                # 时间范围查询
+                if 'start_date' in conditions:
+                    queryset = queryset.filter(record_time__gte=conditions['start_date'])
+                
+                if 'end_date' in conditions:
+                    queryset = queryset.filter(record_time__lte=conditions['end_date'])
+                
+                # 最近时间查询
+                if 'recent_days' in conditions:
+                    start_date = datetime.now() - timedelta(days=conditions['recent_days'])
+                    queryset = queryset.filter(record_time__gte=start_date)
+                
+                # 限制结果数量
+                limit = conditions.get('limit', 100)
+                queryset = queryset[:limit]
+                
+                # 转换为字典格式
+                results = []
+                for record in queryset:
+                    results.append({
+                        "id": record.id,
+                        "location": record.location,
+                        "ph_value": float(record.ph_value) if record.ph_value else None,
+                        "dissolved_oxygen": float(record.dissolved_oxygen) if record.dissolved_oxygen else None,
+                        "turbidity": float(record.turbidity) if record.turbidity else None,
+                        "temperature": float(record.temperature) if record.temperature else None,
+                        "conductivity": float(record.conductivity) if record.conductivity else None,
+                        "ammonia_nitrogen": float(record.ammonia_nitrogen) if record.ammonia_nitrogen else None,
+                        "total_phosphorus": float(record.total_phosphorus) if record.total_phosphorus else None,
+                        "record_time": record.record_time.isoformat() if record.record_time else None,
+                        "created_at": record.created_at.isoformat() if record.created_at else None
+                    })
+                
+                return results
             
-            if 'ph_min' in conditions:
-                queryset = queryset.filter(ph_value__gte=conditions['ph_min'])
-            
-            if 'ph_max' in conditions:
-                queryset = queryset.filter(ph_value__lte=conditions['ph_max'])
-            
-            if 'do_min' in conditions:
-                queryset = queryset.filter(dissolved_oxygen__gte=conditions['do_min'])
-            
-            if 'do_max' in conditions:
-                queryset = queryset.filter(dissolved_oxygen__lte=conditions['do_max'])
-            
-            if 'turbidity_max' in conditions:
-                queryset = queryset.filter(turbidity__lte=conditions['turbidity_max'])
-            
-            # 时间范围查询
-            if 'start_date' in conditions:
-                queryset = queryset.filter(record_time__gte=conditions['start_date'])
-            
-            if 'end_date' in conditions:
-                queryset = queryset.filter(record_time__lte=conditions['end_date'])
-            
-            # 最近时间查询
-            if 'recent_days' in conditions:
-                start_date = datetime.now() - timedelta(days=conditions['recent_days'])
-                queryset = queryset.filter(record_time__gte=start_date)
-            
-            # 限制结果数量
-            limit = conditions.get('limit', 100)
-            queryset = queryset[:limit]
-            
-            # 转换为字典格式
-            results = []
-            for record in queryset:
-                results.append({
-                    "id": record.id,
-                    "location": record.location,
-                    "ph_value": float(record.ph_value) if record.ph_value else None,
-                    "dissolved_oxygen": float(record.dissolved_oxygen) if record.dissolved_oxygen else None,
-                    "turbidity": float(record.turbidity) if record.turbidity else None,
-                    "temperature": float(record.temperature) if record.temperature else None,
-                    "conductivity": float(record.conductivity) if record.conductivity else None,
-                    "ammonia_nitrogen": float(record.ammonia_nitrogen) if record.ammonia_nitrogen else None,
-                    "total_phosphorus": float(record.total_phosphorus) if record.total_phosphorus else None,
-                    "record_time": record.record_time.isoformat() if record.record_time else None,
-                    "created_at": record.created_at.isoformat() if record.created_at else None
-                })
-            
+            # 调用同步函数
+            results = await get_queryset()
             return results
             
         except Exception as e:
@@ -247,7 +268,7 @@ class EnhancedDataQueryAgent(EnhancedBaseAgent):
         
         # 基于结果生成建议
         ph_values = [r['ph_value'] for r in results if r['ph_value']]
-        do_values = [r['dissolved_oxygen'] for r in results if r['dissolved_oxygen]]
+        do_values = [r['dissolved_oxygen'] for r in results if r['dissolved_oxygen']]
         turbidity_values = [r['turbidity'] for r in results if r['turbidity']]
         
         # pH值建议

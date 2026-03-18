@@ -74,7 +74,9 @@ def ai_chat(request):
                 
                 # 创建Agent并处理
                 agent = EnhancedDataQueryAgent(model_config)
-                result = await agent.process_query(message, context)
+                result = loop.run_until_complete(
+                    agent.process_query(message, context)
+                )
             else:
                 # 使用默认配置
                 result = loop.run_until_complete(

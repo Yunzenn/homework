@@ -1,6 +1,6 @@
 # 水质监控系统
 
-一个基于 Vue 3 + Django 的现代化水质监测管理系统，提供实时数据监控、智能分析、异常报警等功能。系统采用前后端分离架构，支持多用户权限管理，适用于水务公司、环保部门等水质监测场景。
+一个基于 Vue 3 + Django 的现代化水质监测管理系统，提供实时数据监控、智能分析、异常报警等功能。
 
 ## 🌟 项目特色
 
@@ -11,42 +11,58 @@
 - **🤖 AI助手**: 集成AI智能分析，提供水质预测和决策建议
 - **📱 响应式设计**: 现代化UI界面，支持多设备访问
 
-## 🏢 应用场景
+## 🏗️ 技术栈
 
-- **🏭 水务公司**: 日常水质监测管理，确保供水安全
-- **🌍 环保部门**: 环境水质监控，污染源追踪
-- **💧 自来水厂**: 源水到出厂全流程水质监控
-- **🏗️ 工业园区**: 工业废水排放监测与管理
-- **🏞️ 景区管理**: 景观水体质量维护
-- **🔬 科研机构**: 水质数据收集与研究分析
+### 后端 (Django)
+- **框架**: Django 4.2.7 + Django REST Framework
+- **数据库**: SQLite 轻量级数据库
+- **认证**: JWT Token 认证
+- **AI模块**: 支持多模型接入的智能分析
+- **数据处理**: Pandas, NumPy, Scikit-learn
 
-## 🏗️ 技术架构
+### 前端 (Vue 3)
+- **框架**: Vue 3 + Composition API
+- **UI组件**: Element Plus
+- **状态管理**: Pinia
+- **路由**: Vue Router
+- **构建工具**: Vite
+- **图表**: ECharts
 
-### 后端架构 (Django)
-- **RESTful API**: 标准化接口设计，支持前后端分离
-- **JWT认证**: 无状态认证机制，安全可靠
-- **权限控制**: 基于角色的权限管理 (RBAC)
-- **数据库**: SQLite轻量级数据库，易于部署
-- **AI Agent**: 智能分析模块，支持多模型接入
-- **异步处理**: 支持AI Agent异步任务处理
+## 📁 项目结构
 
-### 前端架构 (Vue 3)
-- **组件化开发**: 可复用的Vue组件设计
-- **状态管理**: Pinia集中状态管理
-- **路由管理**: Vue Router单页应用路由
-- **UI框架**: Element Plus现代化组件库
-- **构建工具**: Vite快速构建和热更新
-
-### 数据流程
 ```
-水质传感器 → 数据采集 → 后端API → 数据处理 → 前端展示
-                    ↓
-                AI分析 → 智能预测 → 决策建议
+homework/
+├── src/                    # Django 后端
+│   ├── api/                # API 接口
+│   │   ├── models.py       # 数据模型
+│   │   ├── views.py        # API 视图
+│   │   ├── serializers.py  # 序列化器
+│   │   └── urls.py        # 路由配置
+│   ├── ai_agents/          # AI Agent模块
+│   │   ├── core/          # AI核心逻辑
+│   │   └── api/           # AI API接口
+│   ├── users/              # 用户管理
+│   ├── water_quality/      # 项目配置
+│   └── manage.py          # Django 管理脚本
+├── web/                    # Vue 前端
+│   ├── src/
+│   │   ├── api/           # API 调用
+│   │   ├── components/    # 公共组件
+│   │   ├── views/         # 页面组件
+│   │   ├── router/        # 路由配置
+│   │   ├── stores/        # 状态管理
+│   │   └── utils/         # 工具函数
+│   └── package.json
+├── start.bat               # Windows 启动脚本
+├── start.ps1               # PowerShell 启动脚本
+├── start.sh                # Linux/macOS 启动脚本
+└── README.md
 ```
 
 ## 🚀 启动方式
 
 ### 🎯 一键启动 (推荐)
+
 ```bash
 # Windows
 start.bat
@@ -61,11 +77,11 @@ chmod +x start.sh
 
 ### 🔧 手动启动
 
-### 环境要求
+#### 环境要求
 - Python 3.8+
 - Node.js 16+
 
-### 后端启动
+#### 后端启动
 ```bash
 cd src
 pip install -r requirements.txt
@@ -73,114 +89,59 @@ python manage.py migrate
 python manage.py runserver 8000
 ```
 
-### 前端启动
+#### 前端启动
 ```bash
 cd web
 npm install
 npm run dev
 ```
 
-### 访问地址
-- 前端：http://localhost:5173
-- 后端API：http://localhost:8000/api
-- 登录页面：http://localhost:5173/enhanced-login
+## 🌐 访问地址
 
-### 测试账号
-- 用户名：`admin`
-- 密码：`admin123`
+- **前端界面**: http://localhost:5173
+- **后端API**: http://localhost:8000/api
+- **登录页面**: http://localhost:5173/enhanced-login
 
-## 📁 项目结构
+## 👤 测试账号
 
-```
-homework/
-├── src/                    # Django 后端
-│   ├── api/                # API 接口
-│   │   ├── models.py       # 数据模型
-│   │   ├── views.py        # API 视图
-│   │   └── urls.py         # 路由配置
-│   ├── ai_agents/          # AI Agent模块
-│   │   ├── api/            # AI API接口
-│   │   ├── core/           # AI核心逻辑
-│   │   │   ├── model_interface.py      # 模型接口
-│   │   │   ├── enhanced_agent.py      # 增强Agent
-│   │   │   └── enhanced_data_query_agent.py # 数据查询Agent
-│   │   ├── config.py       # AI配置管理
-│   │   └── urls.py         # AI路由配置
-│   ├── users/              # 用户管理
-│   │   ├── models.py       # 用户模型
-│   │   ├── views.py        # 用户视图
-│   │   └── serializers.py   # 序列化器
-│   ├── water_quality/      # 项目配置
-│   │   ├── settings.py     # Django 设置
-│   │   └── urls.py         # 主路由
-│   └── manage.py           # Django 管理脚本
-├── web/                    # Vue 前端
-│   ├── src/
-│   │   ├── api/           # API 调用
-│   │   │   ├── auth.js    # 认证接口
-│   │   │   ├── ai.js      # AI接口
-│   │   │   └── waterQuality.js # 业务接口
-│   │   ├── components/    # 公共组件
-│   │   ├── layout/        # 布局组件
-│   │   │   └── index.vue  # 主布局
-│   │   ├── router/        # 路由配置
-│   │   │   └── index.js  # 路由定义
-│   │   ├── stores/        # 状态管理
-│   │   │   └── auth.js    # 认证状态
-│   │   ├── utils/         # 工具函数
-│   │   │   └── request.js # HTTP 请求
-│   │   └── views/         # 页面组件
-│   │       ├── Dashboard.vue      # 主界面
-│   │       ├── AIChat.vue        # AI智能助手
-│   │       ├── Alerts.vue        # 报警管理
-│   │       ├── DataAnalysis.vue  # 数据分析
-│   │       ├── Records.vue      # 数据管理
-│   │       ├── BatchInput.vue   # 数据录入
-│   │       └── login/          # 登录页面
-│   │           ├── EnhancedAnimatedLogin.vue
-│   │           ├── ForgotPassword.vue
-│   │           ├── Register.vue
-│   │           └── ResetPassword.vue
-│   ├── package.json
-│   └── vite.config.js
-├── test_login.html          # 开发测试页面
-├── start.bat               # Windows 启动脚本
-├── start.ps1               # PowerShell 启动脚本
-├── start.sh                # Linux/macOS 启动脚本
-├── start_ai_service.py      # AI服务启动脚本
-└── README.md
-```
+- **用户名**: `admin`
+- **密码**: `admin123`
 
-## 🤖 AI智能助手
+## 📊 核心功能
 
-### 功能特色
-- **多模型支持**: 本地LLM、OpenAI、Claude、自定义API
-- **智能配置**: 可视化配置界面，一键切换模型
-- **实时测试**: 配置后立即测试连接状态
-- **数据查询**: 自然语言查询水质数据
-- **趋势分析**: 智能分析数据变化趋势
-- **异常检测**: 自动识别水质异常情况
-- **预测分析**: 基于历史数据预测未来趋势
+### 数据管理
+- **批量录入**: 支持手动输入、表格批量、文件导入三种方式
+- **数据查看**: 多视图展示（表格、时间轴、日历、波形、对比）
+- **数据导出**: 支持 CSV 格式导出
+
+### 智能分析
+- **趋势分析**: 水质指标变化趋势
+- **异常检测**: 基于阈值的智能报警
+- **统计报表**: 完整的数据统计分析
+
+### AI 智能助手
+- **多模型支持**: 本地LLM、OpenAI、Claude等
+- **自然语言查询**: 用自然语言查询水质数据
+- **预测分析**: 基于历史数据预测趋势
 - **决策建议**: 提供专业的治理建议
 
-### 快速配置
-1. 访问AI智能助手：http://localhost:5173/ai-chat
-2. 点击右上角⚙️设置按钮
-3. 选择模型类型并填写配置
-4. 点击"测试连接"验证配置
-5. 保存配置开始使用
+## 🔧 开发说明
 
-### 支持的模型
-- **本地模型**: Ollama、LM Studio等
-  ```bash
-  # 启动本地服务
-  python start_ai_service.py --service ollama
-  ```
-- **OpenAI**: GPT-3.5、GPT-4系列
-  - API密钥：sk-...
-  - 模型选择：gpt-3.5-turbo、gpt-4
-- **Claude**: Claude 3 Sonnet、Haiku、Opus
-  - API密钥：sk-ant-...
-  - 模型选择：claude-3-sonnet-20240229
-- **自定义API**: 任何OpenAI兼容的API服务
+### API 接口
+- **记录管理**: `/api/records/`
+- **统计数据**: `/api/records/stats/`
+- **报警数据**: `/api/records/alerts/`
+- **AI分析**: `/api/ai/`
 
+### 数据模型
+- **WaterQualityRecord**: 水质记录核心模型
+- **User**: 用户模型（扩展Django用户）
+
+### 权限体系
+- **管理员**: 全部权限
+- **操作员**: 数据录入和查看
+- **观察员**: 仅查看权限
+
+## 📄 许可证
+
+MIT License

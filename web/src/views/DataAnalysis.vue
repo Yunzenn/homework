@@ -64,6 +64,19 @@
       </div>
     </div>
 
+    <!-- 智能分析区域 -->
+    <div class="intelligent-analysis-section">
+      <div class="analysis-header">
+        <h3 class="section-title">
+          <el-icon><MagicStick /></el-icon>
+          智能分析中心
+        </h3>
+        <p class="section-subtitle">污染溯源 · 水质预测 · 决策支持</p>
+      </div>
+      
+      <SimpleAnalysis />
+    </div>
+
     <!-- 图表分析区域 -->
     <div class="charts-section">
       <div class="chart-row">
@@ -396,6 +409,7 @@
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useWaterQualityStore } from '@/stores/waterQuality'
 import * as echarts from 'echarts'
+import SimpleAnalysis from '@/components/SimpleAnalysis.vue'
 import {
   DataLine,
   Location,
@@ -411,7 +425,8 @@ import {
   View,
   ArrowUp,
   ArrowDown,
-  Minus
+  Minus,
+  MagicStick
 } from '@element-plus/icons-vue'
 
 // Store
@@ -1216,6 +1231,38 @@ onMounted(() => {
 
 .change-icon {
   margin-left: 4px;
+}
+
+/* ===== 智能分析区域 ===== */
+.intelligent-analysis-section {
+  margin: 32px 0;
+  padding: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  color: white;
+}
+
+.intelligent-analysis-section .analysis-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.intelligent-analysis-section .section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.intelligent-analysis-section .section-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-weight: 400;
 }
 
 /* ===== 图表区域 ===== */
