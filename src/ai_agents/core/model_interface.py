@@ -213,7 +213,12 @@ class LocalLLMModel(BaseModelInterface):
         
         if response.status_code == 200:
             result = response.json()
-            return result.get("response", "")
+            response_text = result.get("response", "")
+            # 确保返回的是正确的UTF-8编码字符串
+            if isinstance(response_text, str):
+                return response_text
+            else:
+                return str(response_text)
         else:
             logger.error(f"Ollama API错误: {response.status_code} - {response.text}")
             return f"Ollama调用失败: {response.status_code}"

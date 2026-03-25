@@ -2,6 +2,27 @@ from django.db import models
 from django.utils import timezone
 
 
+class MonitoringPoint(models.Model):
+    """监测点模型"""
+    point_id = models.CharField('监测点编号', max_length=50, unique=True, db_index=True)
+    name = models.CharField('监测点名称', max_length=100)
+    latitude = models.DecimalField('纬度', max_digits=10, decimal_places=7)
+    longitude = models.DecimalField('经度', max_digits=10, decimal_places=7)
+    location_description = models.TextField('位置描述', blank=True, null=True)
+    is_active = models.BooleanField('是否启用', default=True)
+    created_at = models.DateTimeField('创建时间', auto_now_add=True)
+    updated_at = models.DateTimeField('更新时间', auto_now=True)
+    
+    class Meta:
+        db_table = 'api_monitoringpoint'
+        ordering = ['point_id']
+        verbose_name = '监测点'
+        verbose_name_plural = '监测点'
+    
+    def __str__(self):
+        return f"{self.point_id} - {self.name}"
+
+
 class WaterQualityRecord(models.Model):
     """水质记录模型"""
     point_id = models.CharField('监测点编号', max_length=50, db_index=True)
@@ -65,7 +86,12 @@ class WaterQualityRecord(models.Model):
     @classmethod
     def get_by_point_id(cls, point_id):
         """根据监测点获取记录"""
-        return cls.objects.filter(point_id__icontains=point_id)
+        return cls.objects.filter(point__point_id__icontains=point_id)
+    
+    @classmethod
+    def get_by_point(cls, point):
+        """根据监测点对象获取记录"""
+        return cls.objects.filter(point=point)
     
     @classmethod
     def get_by_date_range(cls, start_date=None, end_date=None):

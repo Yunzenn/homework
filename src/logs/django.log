@@ -1,0 +1,488 @@
+WARNING 2026-03-25 18:29:00,332 log 11864 33008 Unauthorized: /api/ai/chat/
+WARNING 2026-03-25 18:29:00,332 log 11864 33008 Unauthorized: /api/ai/chat/
+WARNING 2026-03-25 18:29:00,334 log 11864 33008 "POST /api/ai/chat/ HTTP/1.1" 401 172
+WARNING 2026-03-25 18:29:00,334 log 11864 33008 "POST /api/ai/chat/ HTTP/1.1" 401 172
+WARNING 2026-03-25 18:29:00,356 log 11864 19172 Unauthorized: /api/auth/logout/
+WARNING 2026-03-25 18:29:00,356 log 11864 19172 Unauthorized: /api/auth/logout/
+WARNING 2026-03-25 18:29:00,359 log 11864 19172 "POST /api/auth/logout/ HTTP/1.1" 401 172
+WARNING 2026-03-25 18:29:00,359 log 11864 19172 "POST /api/auth/logout/ HTTP/1.1" 401 172
+WARNING 2026-03-25 18:29:00,403 log 11864 11068 Unauthorized: /api/auth/logout/
+WARNING 2026-03-25 18:29:00,403 log 11864 11068 Unauthorized: /api/auth/logout/
+WARNING 2026-03-25 18:29:00,405 log 11864 11068 "POST /api/auth/logout/ HTTP/1.1" 401 172
+WARNING 2026-03-25 18:29:00,405 log 11864 11068 "POST /api/auth/logout/ HTTP/1.1" 401 172
+INFO 2026-03-25 18:29:17,675 log 11864 25828 "POST /api/auth/login/ HTTP/1.1" 200 1216
+INFO 2026-03-25 18:29:17,675 log 11864 25828 "POST /api/auth/login/ HTTP/1.1" 200 1216
+INFO 2026-03-25 18:29:28,007 smart_chat_agent 11864 4192 Incoming message: 你好
+INFO 2026-03-25 18:29:28,007 smart_chat_agent 11864 4192 Incoming message: 你好
+INFO 2026-03-25 18:29:28,015 smart_chat_agent 11864 4192 未匹配到具体意图，使用通用对话: 你好
+INFO 2026-03-25 18:29:28,015 smart_chat_agent 11864 4192 未匹配到具体意图，使用通用对话: 你好
+INFO 2026-03-25 18:29:28,017 smart_chat_agent 11864 4192 Analyzed intent: general - 
+INFO 2026-03-25 18:29:28,017 smart_chat_agent 11864 4192 Analyzed intent: general - 
+INFO 2026-03-25 18:29:28,019 smart_chat_agent 11864 4192 Model input prompt (first 100 chars): 你好
+INFO 2026-03-25 18:29:28,019 smart_chat_agent 11864 4192 Model input prompt (first 100 chars): 你好
+ERROR 2026-03-25 18:29:32,090 model_interface 11864 4192 本地LLM调用异常: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/generate (Caused by NewConnectionError("HTTPConnection(host='localhost', port=11434): Failed to establish a new connection: [WinError 10061] 由于目标计算机积极拒绝，无法连接。"))
+ERROR 2026-03-25 18:29:32,090 model_interface 11864 4192 本地LLM调用异常: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/generate (Caused by NewConnectionError("HTTPConnection(host='localhost', port=11434): Failed to establish a new connection: [WinError 10061] 由于目标计算机积极拒绝，无法连接。"))
+INFO 2026-03-25 18:29:32,090 smart_chat_agent 11864 4192 Model response (first 100 chars): 本地模型调用异常: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/gene
+INFO 2026-03-25 18:29:32,090 smart_chat_agent 11864 4192 Model response (first 100 chars): 本地模型调用异常: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/gene
+INFO 2026-03-25 18:29:32,091 smart_chat_agent 11864 4192 Final result type: general, message length: 257
+INFO 2026-03-25 18:29:32,091 smart_chat_agent 11864 4192 Final result type: general, message length: 257
+INFO 2026-03-25 18:29:32,092 log 11864 4192 "POST /api/ai/chat/ HTTP/1.1" 200 502
+INFO 2026-03-25 18:29:32,092 log 11864 4192 "POST /api/ai/chat/ HTTP/1.1" 200 502
+ERROR 2026-03-25 18:29:44,691 log 11864 30412 Service Unavailable: /api/ai/test-ollama/
+ERROR 2026-03-25 18:29:44,691 log 11864 30412 Service Unavailable: /api/ai/test-ollama/
+ERROR 2026-03-25 18:29:44,699 log 11864 30412 "POST /api/ai/test-ollama/ HTTP/1.1" 503 126
+ERROR 2026-03-25 18:29:44,699 log 11864 30412 "POST /api/ai/test-ollama/ HTTP/1.1" 503 126
+INFO 2026-03-25 18:30:39,359 log 11864 23620 "POST /api/ai/test-ollama/ HTTP/1.1" 200 226
+INFO 2026-03-25 18:30:39,359 log 11864 23620 "POST /api/ai/test-ollama/ HTTP/1.1" 200 226
+INFO 2026-03-25 18:30:48,309 smart_chat_agent 11864 27752 Incoming message: 你好
+INFO 2026-03-25 18:30:48,309 smart_chat_agent 11864 27752 Incoming message: 你好
+INFO 2026-03-25 18:30:48,310 smart_chat_agent 11864 27752 未匹配到具体意图，使用通用对话: 你好
+INFO 2026-03-25 18:30:48,310 smart_chat_agent 11864 27752 未匹配到具体意图，使用通用对话: 你好
+INFO 2026-03-25 18:30:48,311 smart_chat_agent 11864 27752 Analyzed intent: general - 
+INFO 2026-03-25 18:30:48,311 smart_chat_agent 11864 27752 Analyzed intent: general - 
+INFO 2026-03-25 18:30:48,312 smart_chat_agent 11864 27752 Model input prompt (first 100 chars): 你好
+INFO 2026-03-25 18:30:48,312 smart_chat_agent 11864 27752 Model input prompt (first 100 chars): 你好
+INFO 2026-03-25 18:30:51,768 smart_chat_agent 11864 27752 Model response (first 100 chars): 你好！我是水质检测系统的 AI 数据分析专家。请问您有任何水质相关的疑问或需要数据分析帮助的地方吗？我会尽力为您解答。
+INFO 2026-03-25 18:30:51,768 smart_chat_agent 11864 27752 Model response (first 100 chars): 你好！我是水质检测系统的 AI 数据分析专家。请问您有任何水质相关的疑问或需要数据分析帮助的地方吗？我会尽力为您解答。
+INFO 2026-03-25 18:30:51,770 smart_chat_agent 11864 27752 Final result type: general, message length: 59
+INFO 2026-03-25 18:30:51,770 smart_chat_agent 11864 27752 Final result type: general, message length: 59
+INFO 2026-03-25 18:30:51,773 log 11864 27752 "POST /api/ai/chat/ HTTP/1.1" 200 362
+INFO 2026-03-25 18:30:51,773 log 11864 27752 "POST /api/ai/chat/ HTTP/1.1" 200 362
+INFO 2026-03-25 18:30:58,241 smart_chat_agent 11864 18012 Incoming message: 杭州水质
+INFO 2026-03-25 18:30:58,241 smart_chat_agent 11864 18012 Incoming message: 杭州水质
+INFO 2026-03-25 18:30:58,243 smart_chat_agent 11864 18012 意图匹配成功: data_query, 模式: 杭州.*水质, 消息: 杭州水质
+INFO 2026-03-25 18:30:58,243 smart_chat_agent 11864 18012 意图匹配成功: data_query, 模式: 杭州.*水质, 消息: 杭州水质
+INFO 2026-03-25 18:30:58,244 smart_chat_agent 11864 18012 Analyzed intent: data_query - 杭州水质
+INFO 2026-03-25 18:30:58,244 smart_chat_agent 11864 18012 Analyzed intent: data_query - 杭州水质
+INFO 2026-03-25 18:30:58,249 smart_chat_agent 11864 18012 提取的查询条件: {'location': '杭州'}
+INFO 2026-03-25 18:30:58,249 smart_chat_agent 11864 18012 提取的查询条件: {'location': '杭州'}
+INFO 2026-03-25 18:30:58,251 smart_chat_agent 11864 18012 Extracted conditions: {'location': '杭州'}
+INFO 2026-03-25 18:30:58,251 smart_chat_agent 11864 18012 Extracted conditions: {'location': '杭州'}
+INFO 2026-03-25 18:30:58,262 smart_chat_agent 11864 18012 Database query returned 16 records
+INFO 2026-03-25 18:30:58,262 smart_chat_agent 11864 18012 Database query returned 16 records
+INFO 2026-03-25 18:30:58,264 smart_chat_agent 11864 18012 Data analysis model input (first 100 chars): 用户查询：杭州水质
+
+查询结果：找到 16 条记录
+
+数据样本：
+1. p4 - 2026-03-18 18:52:00
+   余氯: 100.0mg/L ⚠️过高
+   电导率: 1.0µS/cm
+
+INFO 2026-03-25 18:30:58,264 smart_chat_agent 11864 18012 Data analysis model input (first 100 chars): 用户查询：杭州水质
+
+查询结果：找到 16 条记录
+
+数据样本：
+1. p4 - 2026-03-18 18:52:00
+   余氯: 100.0mg/L ⚠️过高
+   电导率: 1.0µS/cm
+
+INFO 2026-03-25 18:31:17,261 smart_chat_agent 11864 18012 Data analysis model response (first 100 chars): # 状态概览
+
+从提供的数据样本来看，杭州水质检测系统的监测点在多个时间点上存在一些异常值和不达标的情况。以下是对各项指标的初步评估：
+
+- **余氯**：有多条记录显示余氯过高（如 p4 和 p1）
+INFO 2026-03-25 18:31:17,261 smart_chat_agent 11864 18012 Data analysis model response (first 100 chars): # 状态概览
+
+从提供的数据样本来看，杭州水质检测系统的监测点在多个时间点上存在一些异常值和不达标的情况。以下是对各项指标的初步评估：
+
+- **余氯**：有多条记录显示余氯过高（如 p4 和 p1）
+INFO 2026-03-25 18:31:17,263 smart_chat_agent 11864 18012 Final result type: unknown, message length: 1147
+INFO 2026-03-25 18:31:17,263 smart_chat_agent 11864 18012 Final result type: unknown, message length: 1147
+INFO 2026-03-25 18:31:17,267 log 11864 18012 "POST /api/ai/chat/ HTTP/1.1" 200 8547
+INFO 2026-03-25 18:31:17,267 log 11864 18012 "POST /api/ai/chat/ HTTP/1.1" 200 8547
+INFO 2026-03-25 18:34:01,654 log 11864 28720 "POST /api/auth/login/ HTTP/1.1" 200 1216
+INFO 2026-03-25 18:34:01,654 log 11864 28720 "POST /api/auth/login/ HTTP/1.1" 200 1216
+INFO 2026-03-25 18:34:11,313 smart_chat_agent 11864 3196 Incoming message: 杭州水质
+INFO 2026-03-25 18:34:11,313 smart_chat_agent 11864 3196 Incoming message: 杭州水质
+INFO 2026-03-25 18:34:11,314 smart_chat_agent 11864 3196 意图匹配成功: data_query, 模式: 杭州.*水质, 消息: 杭州水质
+INFO 2026-03-25 18:34:11,314 smart_chat_agent 11864 3196 意图匹配成功: data_query, 模式: 杭州.*水质, 消息: 杭州水质
+INFO 2026-03-25 18:34:11,316 smart_chat_agent 11864 3196 Analyzed intent: data_query - 杭州水质
+INFO 2026-03-25 18:34:11,316 smart_chat_agent 11864 3196 Analyzed intent: data_query - 杭州水质
+INFO 2026-03-25 18:34:11,317 smart_chat_agent 11864 3196 提取的查询条件: {'location': '杭州'}
+INFO 2026-03-25 18:34:11,317 smart_chat_agent 11864 3196 提取的查询条件: {'location': '杭州'}
+INFO 2026-03-25 18:34:11,319 smart_chat_agent 11864 3196 Extracted conditions: {'location': '杭州'}
+INFO 2026-03-25 18:34:11,319 smart_chat_agent 11864 3196 Extracted conditions: {'location': '杭州'}
+INFO 2026-03-25 18:34:11,324 smart_chat_agent 11864 3196 Database query returned 16 records
+INFO 2026-03-25 18:34:11,324 smart_chat_agent 11864 3196 Database query returned 16 records
+INFO 2026-03-25 18:34:11,326 smart_chat_agent 11864 3196 Data analysis model input (first 100 chars): 用户查询：杭州水质
+
+查询结果：找到 16 条记录
+
+数据样本：
+1. p4 - 2026-03-18 18:52:00
+   余氯: 100.0mg/L ⚠️过高
+   电导率: 1.0µS/cm
+
+INFO 2026-03-25 18:34:11,326 smart_chat_agent 11864 3196 Data analysis model input (first 100 chars): 用户查询：杭州水质
+
+查询结果：找到 16 条记录
+
+数据样本：
+1. p4 - 2026-03-18 18:52:00
+   余氯: 100.0mg/L ⚠️过高
+   电导率: 1.0µS/cm
+
+INFO 2026-03-25 18:34:28,691 smart_chat_agent 11864 3196 Data analysis model response (first 100 chars):  ```markdown
+# 状态概览
+
+在16条水质记录中，我们发现以下异常值：
+- **余氯**：两条记录显示余氯过高（100.0mg/L 和 11.0mg/L），超过正常范围。
+- **pH值*
+INFO 2026-03-25 18:34:28,691 smart_chat_agent 11864 3196 Data analysis model response (first 100 chars):  ```markdown
+# 状态概览
+
+在16条水质记录中，我们发现以下异常值：
+- **余氯**：两条记录显示余氯过高（100.0mg/L 和 11.0mg/L），超过正常范围。
+- **pH值*
+INFO 2026-03-25 18:34:28,694 smart_chat_agent 11864 3196 Final result type: unknown, message length: 1071
+INFO 2026-03-25 18:34:28,694 smart_chat_agent 11864 3196 Final result type: unknown, message length: 1071
+INFO 2026-03-25 18:34:28,697 log 11864 3196 "POST /api/ai/chat/ HTTP/1.1" 200 8384
+INFO 2026-03-25 18:34:28,697 log 11864 3196 "POST /api/ai/chat/ HTTP/1.1" 200 8384
+INFO 2026-03-25 18:34:56,310 smart_chat_agent 11864 10376 Incoming message: 最近几周水质
+INFO 2026-03-25 18:34:56,310 smart_chat_agent 11864 10376 Incoming message: 最近几周水质
+INFO 2026-03-25 18:34:56,312 smart_chat_agent 11864 10376 未匹配到具体意图，使用通用对话: 最近几周水质
+INFO 2026-03-25 18:34:56,312 smart_chat_agent 11864 10376 未匹配到具体意图，使用通用对话: 最近几周水质
+INFO 2026-03-25 18:34:56,314 smart_chat_agent 11864 10376 Analyzed intent: general - 
+INFO 2026-03-25 18:34:56,314 smart_chat_agent 11864 10376 Analyzed intent: general - 
+INFO 2026-03-25 18:34:56,315 smart_chat_agent 11864 10376 Model input prompt (first 100 chars): 最近几周水质
+INFO 2026-03-25 18:34:56,315 smart_chat_agent 11864 10376 Model input prompt (first 100 chars): 最近几周水质
+INFO 2026-03-25 18:35:00,214 smart_chat_agent 11864 10376 Model response (first 100 chars): 好的，请问您需要了解哪些具体水质参数的最新情况呢？例如pH值、浊度、溶解氧或者电导率等。这样我可以为您详细分析最近几周的数据，并给出相应的建议和解释。
+INFO 2026-03-25 18:35:00,214 smart_chat_agent 11864 10376 Model response (first 100 chars): 好的，请问您需要了解哪些具体水质参数的最新情况呢？例如pH值、浊度、溶解氧或者电导率等。这样我可以为您详细分析最近几周的数据，并给出相应的建议和解释。
+INFO 2026-03-25 18:35:00,216 smart_chat_agent 11864 10376 Final result type: general, message length: 75
+INFO 2026-03-25 18:35:00,216 smart_chat_agent 11864 10376 Final result type: general, message length: 75
+INFO 2026-03-25 18:35:00,219 log 11864 10376 "POST /api/ai/chat/ HTTP/1.1" 200 414
+INFO 2026-03-25 18:35:00,219 log 11864 10376 "POST /api/ai/chat/ HTTP/1.1" 200 414
+INFO 2026-03-25 18:37:19,747 smart_chat_agent 11864 30452 Incoming message: 查询最近几天的水质情况，以图表形式给出
+INFO 2026-03-25 18:37:19,747 smart_chat_agent 11864 30452 Incoming message: 查询最近几天的水质情况，以图表形式给出
+INFO 2026-03-25 18:37:19,750 smart_chat_agent 11864 30452 意图匹配成功: data_query, 模式: 查询.*水质, 消息: 查询最近几天的水质情况，以图表形式给出
+INFO 2026-03-25 18:37:19,750 smart_chat_agent 11864 30452 意图匹配成功: data_query, 模式: 查询.*水质, 消息: 查询最近几天的水质情况，以图表形式给出
+INFO 2026-03-25 18:37:19,751 smart_chat_agent 11864 30452 Analyzed intent: data_query - 查询最近几天的水质
+INFO 2026-03-25 18:37:19,751 smart_chat_agent 11864 30452 Analyzed intent: data_query - 查询最近几天的水质
+INFO 2026-03-25 18:37:19,752 smart_chat_agent 11864 30452 提取的查询条件: {}
+INFO 2026-03-25 18:37:19,752 smart_chat_agent 11864 30452 提取的查询条件: {}
+INFO 2026-03-25 18:37:19,754 smart_chat_agent 11864 30452 Extracted conditions: {}
+INFO 2026-03-25 18:37:19,754 smart_chat_agent 11864 30452 Extracted conditions: {}
+INFO 2026-03-25 18:37:19,760 smart_chat_agent 11864 30452 Database query returned 16 records
+INFO 2026-03-25 18:37:19,760 smart_chat_agent 11864 30452 Database query returned 16 records
+INFO 2026-03-25 18:37:19,762 smart_chat_agent 11864 30452 Data analysis model input (first 100 chars): 用户查询：查询最近几天的水质情况，以图表形式给出
+
+查询结果：找到 16 条记录
+
+数据样本：
+1. p4 - 2026-03-18 18:52:00
+   余氯: 100.0mg/L ⚠️过高
+  
+INFO 2026-03-25 18:37:19,762 smart_chat_agent 11864 30452 Data analysis model input (first 100 chars): 用户查询：查询最近几天的水质情况，以图表形式给出
+
+查询结果：找到 16 条记录
+
+数据样本：
+1. p4 - 2026-03-18 18:52:00
+   余氯: 100.0mg/L ⚠️过高
+  
+INFO 2026-03-25 18:37:44,738 smart_chat_agent 11864 30452 Data analysis model response (first 100 chars):  ```markdown
+# 状态概览
+
+根据最近几天的水质监测数据，发现主要存在以下问题：
+
+1. **余氯含量过高**：在记录中多次出现余氯值超过标准的情况（GB 3838-2002 标准要求饮用
+INFO 2026-03-25 18:37:44,738 smart_chat_agent 11864 30452 Data analysis model response (first 100 chars):  ```markdown
+# 状态概览
+
+根据最近几天的水质监测数据，发现主要存在以下问题：
+
+1. **余氯含量过高**：在记录中多次出现余氯值超过标准的情况（GB 3838-2002 标准要求饮用
+INFO 2026-03-25 18:37:44,739 smart_chat_agent 11864 30452 Final result type: unknown, message length: 1138
+INFO 2026-03-25 18:37:44,739 smart_chat_agent 11864 30452 Final result type: unknown, message length: 1138
+INFO 2026-03-25 18:37:44,742 log 11864 30452 "POST /api/ai/chat/ HTTP/1.1" 200 8476
+INFO 2026-03-25 18:37:44,742 log 11864 30452 "POST /api/ai/chat/ HTTP/1.1" 200 8476
+INFO 2026-03-25 18:38:39,083 smart_chat_agent 11864 25072 Incoming message: 查询最近几个月水质，以图表形式给出
+INFO 2026-03-25 18:38:39,083 smart_chat_agent 11864 25072 Incoming message: 查询最近几个月水质，以图表形式给出
+INFO 2026-03-25 18:38:39,087 smart_chat_agent 11864 25072 意图匹配成功: data_query, 模式: 查询.*水质, 消息: 查询最近几个月水质，以图表形式给出
+INFO 2026-03-25 18:38:39,087 smart_chat_agent 11864 25072 意图匹配成功: data_query, 模式: 查询.*水质, 消息: 查询最近几个月水质，以图表形式给出
+INFO 2026-03-25 18:38:39,089 smart_chat_agent 11864 25072 Analyzed intent: data_query - 查询最近几个月水质
+INFO 2026-03-25 18:38:39,089 smart_chat_agent 11864 25072 Analyzed intent: data_query - 查询最近几个月水质
+INFO 2026-03-25 18:38:39,092 smart_chat_agent 11864 25072 提取的查询条件: {}
+INFO 2026-03-25 18:38:39,092 smart_chat_agent 11864 25072 提取的查询条件: {}
+INFO 2026-03-25 18:38:39,093 smart_chat_agent 11864 25072 Extracted conditions: {}
+INFO 2026-03-25 18:38:39,093 smart_chat_agent 11864 25072 Extracted conditions: {}
+INFO 2026-03-25 18:38:39,102 smart_chat_agent 11864 25072 Database query returned 16 records
+INFO 2026-03-25 18:38:39,102 smart_chat_agent 11864 25072 Database query returned 16 records
+INFO 2026-03-25 18:38:39,104 smart_chat_agent 11864 25072 Data analysis model input (first 100 chars): 用户查询：查询最近几个月水质，以图表形式给出
+
+查询结果：找到 16 条记录
+
+数据样本：
+1. p4 - 2026-03-18 18:52:00
+   余氯: 100.0mg/L ⚠️过高
+   电
+INFO 2026-03-25 18:38:39,104 smart_chat_agent 11864 25072 Data analysis model input (first 100 chars): 用户查询：查询最近几个月水质，以图表形式给出
+
+查询结果：找到 16 条记录
+
+数据样本：
+1. p4 - 2026-03-18 18:52:00
+   余氯: 100.0mg/L ⚠️过高
+   电
+INFO 2026-03-25 18:39:05,169 smart_chat_agent 11864 25072 Data analysis model response (first 100 chars):  ```markdown
+# 状态概览
+
+从提供的16条记录中，我们发现以下关键点：
+
+- **异常值**：余氯值过高（如p4、p1）和pH值过低（如p4、p3、p2）。
+- **正常指标**：电导率
+INFO 2026-03-25 18:39:05,169 smart_chat_agent 11864 25072 Data analysis model response (first 100 chars):  ```markdown
+# 状态概览
+
+从提供的16条记录中，我们发现以下关键点：
+
+- **异常值**：余氯值过高（如p4、p1）和pH值过低（如p4、p3、p2）。
+- **正常指标**：电导率
+INFO 2026-03-25 18:39:05,170 smart_chat_agent 11864 25072 Final result type: unknown, message length: 1078
+INFO 2026-03-25 18:39:05,170 smart_chat_agent 11864 25072 Final result type: unknown, message length: 1078
+INFO 2026-03-25 18:39:05,173 log 11864 25072 "POST /api/ai/chat/ HTTP/1.1" 200 8240
+INFO 2026-03-25 18:39:05,173 log 11864 25072 "POST /api/ai/chat/ HTTP/1.1" 200 8240
+WARNING 2026-03-25 18:49:02,123 log 11864 26504 Unauthorized: /api/monitoring-points/active/
+WARNING 2026-03-25 18:49:02,123 log 11864 26504 Unauthorized: /api/monitoring-points/active/
+WARNING 2026-03-25 18:49:02,125 log 11864 26504 "GET /api/monitoring-points/active/ HTTP/1.1" 401 172
+WARNING 2026-03-25 18:49:02,125 log 11864 26504 "GET /api/monitoring-points/active/ HTTP/1.1" 401 172
+WARNING 2026-03-25 18:49:02,142 log 11864 18532 Unauthorized: /api/auth/logout/
+WARNING 2026-03-25 18:49:02,142 log 11864 18532 Unauthorized: /api/auth/logout/
+WARNING 2026-03-25 18:49:02,143 log 11864 18532 "POST /api/auth/logout/ HTTP/1.1" 401 172
+WARNING 2026-03-25 18:49:02,143 log 11864 18532 "POST /api/auth/logout/ HTTP/1.1" 401 172
+WARNING 2026-03-25 18:49:02,202 log 11864 9660 Unauthorized: /api/auth/logout/
+WARNING 2026-03-25 18:49:02,202 log 11864 9660 Unauthorized: /api/auth/logout/
+WARNING 2026-03-25 18:49:02,204 log 11864 9660 "POST /api/auth/logout/ HTTP/1.1" 401 172
+WARNING 2026-03-25 18:49:02,204 log 11864 9660 "POST /api/auth/logout/ HTTP/1.1" 401 172
+INFO 2026-03-25 18:49:06,330 log 11864 30876 "POST /api/auth/login/ HTTP/1.1" 200 1216
+INFO 2026-03-25 18:49:06,330 log 11864 30876 "POST /api/auth/login/ HTTP/1.1" 200 1216
+INFO 2026-03-25 18:49:09,225 log 11864 31456 "GET /api/records/?page=1&page_size=20&search=&ordering=-date HTTP/1.1" 200 4840
+INFO 2026-03-25 18:49:09,225 log 11864 31456 "GET /api/records/?page=1&page_size=20&search=&ordering=-date HTTP/1.1" 200 4840
+INFO 2026-03-25 18:49:10,184 log 11864 8104 "GET /api/monitoring-points/active/ HTTP/1.1" 200 6565
+INFO 2026-03-25 18:49:10,184 log 11864 8104 "GET /api/monitoring-points/active/ HTTP/1.1" 200 6565
+INFO 2026-03-25 18:49:12,562 log 11864 32096 "GET /api/records/?date_after=2026-03-18&date_before=2026-03-25 HTTP/1.1" 200 1818
+INFO 2026-03-25 18:49:12,562 log 11864 32096 "GET /api/records/?date_after=2026-03-18&date_before=2026-03-25 HTTP/1.1" 200 1818
+WARNING 2026-03-25 18:49:14,258 log 11864 30408 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:14,258 log 11864 30408 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:14,260 log 11864 30408 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:14,260 log 11864 30408 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:19,667 log 11864 20896 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:19,667 log 11864 20896 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:19,702 log 11864 20896 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:19,702 log 11864 20896 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:25,044 log 11864 8348 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:25,044 log 11864 8348 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:25,055 log 11864 8348 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:25,055 log 11864 8348 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:30,437 log 11864 12724 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:30,437 log 11864 12724 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:30,462 log 11864 12724 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:30,462 log 11864 12724 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:36,741 log 11864 32752 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:36,741 log 11864 32752 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:36,744 log 11864 32752 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:36,744 log 11864 32752 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:42,756 log 11864 26520 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:42,756 log 11864 26520 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:42,759 log 11864 26520 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:42,759 log 11864 26520 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:48,755 log 11864 32664 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:48,755 log 11864 32664 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:48,757 log 11864 32664 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:48,757 log 11864 32664 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:54,747 log 11864 29192 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:54,747 log 11864 29192 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:49:54,749 log 11864 29192 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:49:54,749 log 11864 29192 "GET /ws/alerts/ HTTP/1.1" 404 2684
+INFO 2026-03-25 18:49:54,750 basehttp 11864 29192 - Broken pipe from ('127.0.0.1', 59968)
+INFO 2026-03-25 18:49:54,750 basehttp 11864 29192 - Broken pipe from ('127.0.0.1', 59968)
+WARNING 2026-03-25 18:50:00,746 log 11864 14028 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:00,746 log 11864 14028 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:00,748 log 11864 14028 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:00,748 log 11864 14028 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:06,762 log 11864 20880 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:06,762 log 11864 20880 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:06,764 log 11864 20880 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:06,764 log 11864 20880 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:12,765 log 11864 17528 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:12,765 log 11864 17528 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:12,768 log 11864 17528 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:12,768 log 11864 17528 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:18,868 log 11864 11156 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:18,868 log 11864 11156 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:18,870 log 11864 11156 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:18,870 log 11864 11156 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:24,857 log 11864 21300 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:24,857 log 11864 21300 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:24,862 log 11864 21300 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:24,862 log 11864 21300 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:31,281 log 11864 16760 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:31,281 log 11864 16760 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:31,284 log 11864 16760 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:31,284 log 11864 16760 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:37,956 log 11864 21136 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:37,956 log 11864 21136 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:37,959 log 11864 21136 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:37,959 log 11864 21136 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:45,402 log 11864 32816 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:45,402 log 11864 32816 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:45,405 log 11864 32816 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:45,405 log 11864 32816 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:55,338 log 11864 16548 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:55,338 log 11864 16548 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:50:55,343 log 11864 16548 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:50:55,343 log 11864 16548 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:04,921 log 11864 24032 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:04,921 log 11864 24032 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:04,922 log 11864 24032 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:04,922 log 11864 24032 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:15,626 log 11864 29048 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:15,626 log 11864 29048 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:15,627 log 11864 29048 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:15,627 log 11864 29048 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:25,587 log 11864 27444 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:25,587 log 11864 27444 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:25,588 log 11864 27444 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:25,588 log 11864 27444 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:35,140 log 11864 23336 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:35,140 log 11864 23336 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:35,141 log 11864 23336 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:35,141 log 11864 23336 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:44,226 log 11864 18704 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:44,226 log 11864 18704 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:44,228 log 11864 18704 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:44,228 log 11864 18704 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:51,808 log 11864 18856 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:51,808 log 11864 18856 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:51:51,809 log 11864 18856 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:51:51,809 log 11864 18856 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:00,878 log 11864 21556 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:00,878 log 11864 21556 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:00,880 log 11864 21556 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:00,880 log 11864 21556 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:11,535 log 11864 28924 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:11,535 log 11864 28924 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:11,538 log 11864 28924 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:11,538 log 11864 28924 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:21,539 log 11864 23800 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:21,539 log 11864 23800 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:21,539 log 11864 23800 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:21,539 log 11864 23800 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:29,688 log 11864 23352 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:29,688 log 11864 23352 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:29,689 log 11864 23352 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:29,689 log 11864 23352 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:39,988 log 11864 15412 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:39,988 log 11864 15412 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:39,989 log 11864 15412 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:39,989 log 11864 15412 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:47,057 log 11864 12868 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:47,057 log 11864 12868 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:47,058 log 11864 12868 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:47,058 log 11864 12868 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:54,358 log 11864 19432 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:54,358 log 11864 19432 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:52:54,359 log 11864 19432 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:52:54,359 log 11864 19432 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:01,827 log 11864 22140 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:01,827 log 11864 22140 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:01,829 log 11864 22140 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:01,829 log 11864 22140 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:12,573 log 11864 26504 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:12,573 log 11864 26504 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:12,574 log 11864 26504 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:12,574 log 11864 26504 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:18,732 log 11864 24888 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:18,732 log 11864 24888 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:18,733 log 11864 24888 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:18,733 log 11864 24888 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:24,739 log 11864 15780 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:24,739 log 11864 15780 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:24,741 log 11864 15780 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:24,741 log 11864 15780 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:30,776 log 11864 30836 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:30,776 log 11864 30836 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:30,777 log 11864 30836 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:30,777 log 11864 30836 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:36,730 log 11864 17288 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:36,730 log 11864 17288 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:36,732 log 11864 17288 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:36,732 log 11864 17288 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:42,736 log 11864 27368 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:42,736 log 11864 27368 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:42,738 log 11864 27368 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:42,738 log 11864 27368 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:48,737 log 11864 23240 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:48,737 log 11864 23240 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:48,739 log 11864 23240 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:48,739 log 11864 23240 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:54,749 log 11864 21004 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:54,749 log 11864 21004 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:53:54,751 log 11864 21004 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:53:54,751 log 11864 21004 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:00,738 log 11864 9860 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:00,738 log 11864 9860 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:00,740 log 11864 9860 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:00,740 log 11864 9860 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:06,756 log 11864 16488 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:06,756 log 11864 16488 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:06,757 log 11864 16488 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:06,757 log 11864 16488 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:12,748 log 11864 2364 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:12,748 log 11864 2364 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:12,749 log 11864 2364 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:12,749 log 11864 2364 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:18,770 log 11864 8892 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:18,770 log 11864 8892 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:18,771 log 11864 8892 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:18,771 log 11864 8892 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:24,825 log 11864 3832 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:24,825 log 11864 3832 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:24,826 log 11864 3832 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:24,826 log 11864 3832 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:30,930 log 11864 17728 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:30,930 log 11864 17728 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:30,932 log 11864 17728 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:30,932 log 11864 17728 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:37,320 log 11864 24132 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:37,320 log 11864 24132 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:37,321 log 11864 24132 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:37,321 log 11864 24132 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:43,363 log 11864 14736 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:43,363 log 11864 14736 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:43,364 log 11864 14736 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:43,364 log 11864 14736 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:50,397 log 11864 33076 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:50,397 log 11864 33076 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:54:50,399 log 11864 33076 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:54:50,399 log 11864 33076 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:00,256 log 11864 24328 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:00,256 log 11864 24328 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:00,257 log 11864 24328 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:00,257 log 11864 24328 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:06,834 log 11864 33592 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:06,834 log 11864 33592 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:06,835 log 11864 33592 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:06,835 log 11864 33592 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:14,393 log 11864 21512 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:14,393 log 11864 21512 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:14,395 log 11864 21512 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:14,395 log 11864 21512 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:19,743 log 11864 27600 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:19,743 log 11864 27600 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:19,743 log 11864 27600 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:19,743 log 11864 27600 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:25,719 log 11864 30668 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:25,719 log 11864 30668 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:25,720 log 11864 30668 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:25,720 log 11864 30668 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:31,725 log 11864 15408 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:31,725 log 11864 15408 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:31,726 log 11864 15408 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:31,726 log 11864 15408 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:37,746 log 11864 32924 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:37,746 log 11864 32924 Not Found: /ws/alerts/
+WARNING 2026-03-25 18:55:37,748 log 11864 32924 "GET /ws/alerts/ HTTP/1.1" 404 2684
+WARNING 2026-03-25 18:55:37,748 log 11864 32924 "GET /ws/alerts/ HTTP/1.1" 404 2684

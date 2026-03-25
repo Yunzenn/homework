@@ -11,6 +11,7 @@ from django.http import JsonResponse
 import json
 import asyncio
 from datetime import datetime
+import sys
 
 from ..core.agent_manager import agent_manager
 from ..core.data_query_agent import DataQueryAgent
@@ -19,6 +20,8 @@ from ..core.advisory_agent import AdvisoryAgent
 from ..core.prediction_agent import PredictionAgent
 from ..core.anomaly_agent import AnomalyDetectionAgent
 from ..core.report_agent import ReportGenerationAgent
+from ..core.smart_chat_agent import SmartChatAgent
+from ..core.model_interface import ModelConfig, ModelType
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -57,42 +60,93 @@ def ai_chat(request):
         asyncio.set_event_loop(loop)
         
         try:
-            # 如果有用户配置，使用用户配置
+            # 如果有用户配置，使用用户配置，否则使用默认配置
             if ai_config:
-                from ..core.enhanced_data_query_agent import EnhancedDataQueryAgent
-                from ..core.model_interface import ModelConfig, ModelType
-                
+                model_type_key = ai_config.get('modelType', 'local')
+
+                model_type_map = {
+                    'local': ModelType.LOCAL_LLM,
+                    'openai': ModelType.OPENAI_API,
+                    'claude': ModelType.CLAUDE_API,
+                    'custom': ModelType.OPENAI_API
+                }
+
+                model_name_map = {
+                    'local': ai_config.get('localModel', 'qwen2.5-coder:7b'),
+                    'openai': ai_config.get('openaiModel', 'gpt-3.5-turbo'),
+                    'claude': ai_config.get('claudeModel', 'claude-3-sonnet-20240229'),
+                    'custom': ai_config.get('customModel', 'custom-model')
+                }
+
+                api_url_map = {
+                    'local': ai_config.get('localUrl', 'http://localhost:11434/v1'),
+                    'openai': ai_config.get('openaiUrl', 'https://api.openai.com/v1'),
+                    'claude': ai_config.get('claudeUrl', 'https://api.anthropic.com/v1'),
+                    'custom': ai_config.get('customUrl', 'http://localhost:11434/v1')
+                }
+
+                api_key_map = {
+                    'openai': ai_config.get('openaiApiKey'),
+                    'claude': ai_config.get('claudeApiKey'),
+                    'custom': ai_config.get('customApiKey')
+                }
+
+                custom_headers = None
+                if model_type_key == 'custom' and api_key_map.get('custom'):
+                    custom_headers = {
+                        'Authorization': f"Bearer {api_key_map['custom']}"
+                    }
+
                 # 创建模型配置
                 model_config = ModelConfig(
-                    model_type=ModelType.LOCAL_LLM if ai_config.get('modelType') == 'local' else ModelType.OPENAI_API,
-                    api_url=ai_config.get('localUrl', 'http://localhost:11434/v1'),
-                    model_name=ai_config.get('localModel', 'qwen2.5-coder:7b'),
+                    model_type=model_type_map.get(model_type_key, ModelType.LOCAL_LLM),
+                    api_key=api_key_map.get(model_type_key),
+                    api_url=api_url_map.get(model_type_key, 'http://localhost:11434/v1'),
+                    model_name=model_name_map.get(model_type_key, 'qwen2.5-coder:7b'),
                     temperature=ai_config.get('temperature', 0.7),
                     max_tokens=ai_config.get('maxTokens', 2000),
-                    timeout=30
-                )
-                
-                # 创建Agent并处理
-                agent = EnhancedDataQueryAgent(model_config)
-                result = loop.run_until_complete(
-                    agent.process_query(message, context)
+                    timeout=120,  # 增加超时时间到120秒
+                    custom_headers=custom_headers
                 )
             else:
                 # 使用默认配置
-                result = loop.run_until_complete(
-                    agent_manager.process_query(message, context)
+                model_config = ModelConfig(
+                    model_type=ModelType.LOCAL_LLM,
+                    api_url='http://localhost:11434/v1',
+                    model_name='qwen2.5-coder:7b',
+                    temperature=0.7,
+                    max_tokens=2000,
+                    timeout=120
                 )
+                model_type_key = 'local'
+                
+            # 创建模型接口
+            if model_type_key in ['local', 'custom']:
+                from ..core.model_interface import LocalLLMModel
+                model_interface = LocalLLMModel(model_config)
+            elif model_config.model_type == ModelType.CLAUDE_API:
+                from ..core.model_interface import ClaudeModel
+                model_interface = ClaudeModel(model_config)
+            else:
+                from ..core.model_interface import OpenAIModel
+                model_interface = OpenAIModel(model_config)
+            
+            # 创建智能对话Agent并处理 - 始终使用重构的SmartChatAgent
+            agent = SmartChatAgent(model_interface)
+            result = loop.run_until_complete(
+                agent.process_query(message, context)
+            )
         finally:
             loop.close()
         
         # 记录对话历史
         _save_chat_history(request.user, message, result)
         
-        return Response({
+        return JsonResponse({
             'success': True,
             'data': result,
             'timestamp': datetime.now().isoformat()
-        })
+        }, json_dumps_params={'ensure_ascii': False}, status=status.HTTP_200_OK)
         
     except json.JSONDecodeError:
         return Response({

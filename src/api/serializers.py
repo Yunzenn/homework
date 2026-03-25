@@ -1,14 +1,50 @@
 from rest_framework import serializers
-from .models import WaterQualityRecord
+from .models import WaterQualityRecord, MonitoringPoint
+
+
+class MonitoringPointSerializer(serializers.ModelSerializer):
+    """监测点序列化器"""
+    
+    class Meta:
+        model = MonitoringPoint
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at')
+    
+    def validate_point_id(self, value):
+        """验证监测点ID"""
+        if not value or len(value.strip()) == 0:
+            raise serializers.ValidationError('监测点ID不能为空')
+        return value.strip()
+    
+    def validate_latitude(self, value):
+        """验证纬度"""
+        if not (-90 <= value <= 90):
+            raise serializers.ValidationError('纬度必须在-90到90之间')
+        return value
+    
+    def validate_longitude(self, value):
+        """验证经度"""
+        if not (-180 <= value <= 180):
+            raise serializers.ValidationError('经度必须在-180到180之间')
+        return value
 
 
 class WaterQualityRecordSerializer(serializers.ModelSerializer):
     """水质记录序列化器"""
+    point_name = serializers.SerializerMethodField()
     
     class Meta:
         model = WaterQualityRecord
         fields = '__all__'
         read_only_fields = ('created_at', 'updated_at')
+    
+    def get_point_name(self, obj):
+        """获取监测点名称"""
+        try:
+            point = MonitoringPoint.objects.get(point_id=obj.point_id)
+            return point.name
+        except MonitoringPoint.DoesNotExist:
+            return obj.point_id
     
     def validate_point_id(self, value):
         """验证监测点ID"""
@@ -65,6 +101,7 @@ class WaterQualityRecordSerializer(serializers.ModelSerializer):
 class QueryFilterSerializer(serializers.Serializer):
     """查询过滤器序列化器"""
     point_id = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    point = serializers.IntegerField(required=False)  # 监测点ID
     date_start = serializers.DateField(required=False)
     date_end = serializers.DateField(required=False)
     chlorine_min = serializers.FloatField(required=False, min_value=0)

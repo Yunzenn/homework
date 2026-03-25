@@ -12,7 +12,7 @@ from rest_framework import status
 from datetime import datetime
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([])  # 临时移除认证要求，方便前端测试
 def test_ollama_connection(request):
     """
     测试Ollama连接

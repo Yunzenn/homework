@@ -1,19 +1,19 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from django.db.models import Q, Avg, Max, Min, Count
-from django.http import HttpResponse
-
+from django.db.models import Q
+from .models import WaterQualityRecord, MonitoringPoint
 from .serializers import (
     WaterQualityRecordSerializer, 
+    MonitoringPointSerializer,
     QueryFilterSerializer,
     AlertThresholdSerializer,
     StatisticsSerializer
 )
-from .models import WaterQualityRecord
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -21,6 +21,35 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_size = 20
     page_size_query_param = 'page_size'
     max_page_size = 100
+
+
+class MonitoringPointViewSet(viewsets.ModelViewSet):
+    """监测点视图集"""
+    serializer_class = MonitoringPointSerializer
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ['point_id', 'name', 'location_description']
+    ordering_fields = ['point_id', 'name', 'created_at']
+    ordering = ['point_id']
+    permission_classes = [AllowAny]  # 允许未认证访问
+    
+    def get_queryset(self):
+        """获取查询集"""
+        queryset = MonitoringPoint.objects.all()
+        
+        # 只显示启用的监测点（可通过参数控制）
+        active_only = self.request.query_params.get('active_only', 'true')
+        if active_only.lower() == 'true':
+            queryset = queryset.filter(is_active=True)
+        
+        return queryset
+    
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def active(self, request):
+        """获取启用的监测点列表"""
+        active_points = MonitoringPoint.objects.filter(is_active=True)
+        serializer = self.get_serializer(active_points, many=True)
+        return Response(serializer.data)
 
 
 class WaterQualityRecordViewSet(viewsets.ModelViewSet):

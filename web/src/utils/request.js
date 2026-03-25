@@ -6,7 +6,7 @@ import router from '@/router'
 // 创建axios实例
 const service = axios.create({
   baseURL: '/api',
-  timeout: 10000,
+  timeout: 60000, // 增加到60秒，适应AI响应时间
   headers: {
     'Content-Type': 'application/json'
   }
@@ -91,7 +91,7 @@ service.interceptors.response.use(
           // 清除认证信息并跳转到登录页
           const authStore = useAuthStore()
           authStore.logout()
-          router.push('/login')
+          router.push('/enhanced-login')
           break
         case 403:
           ElMessage.error('拒绝访问')

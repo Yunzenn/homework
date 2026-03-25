@@ -5,6 +5,7 @@ from . import views
 # 创建路由器
 router = DefaultRouter()
 router.register(r'records', views.WaterQualityRecordViewSet, basename='waterqualityrecord')
+router.register(r'monitoring-points', views.MonitoringPointViewSet, basename='monitoringpoint')
 
 # URL配置
 urlpatterns = [

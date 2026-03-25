@@ -6,6 +6,7 @@ from .models import User, Role, UserRole, LoginLog, OperationLog
 import uuid
 from datetime import timedelta
 from django.utils import timezone
+from django.db import models
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -51,20 +52,26 @@ class UserLoginSerializer(serializers.Serializer):
     def validate(self, attrs):
         username = attrs.get('username')
         password = attrs.get('password')
+
+        # 支持用户名/邮箱/手机号三种登录标识
+        login_user = User.objects.filter(
+            models.Q(username=username) | models.Q(email=username) | models.Q(phone=username)
+        ).first()
+        auth_username = login_user.username if login_user else username
         
         # 检查用户是否被锁定
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(username=auth_username)
             if user.is_locked and user.lock_time and timezone.now() < user.lock_time:
                 raise serializers.ValidationError('账号已被锁定，请稍后再试')
         except User.DoesNotExist:
             pass
         
         # 验证用户名和密码
-        user = authenticate(username=username, password=password)
+        user = authenticate(username=auth_username, password=password)
         if not user:
             # 记录登录失败
-            self._record_login_failure(username)
+            self._record_login_failure(auth_username)
             raise serializers.ValidationError('用户名或密码错误')
         
         # 检查用户状态
