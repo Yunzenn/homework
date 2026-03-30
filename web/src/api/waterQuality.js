@@ -82,4 +82,58 @@ export const waterQualityApi = {
   }
 }
 
+// 监测点API
+export const monitoringPointApi = {
+  // 获取监测点列表
+  getMonitoringPoints: (params = {}) => {
+    return request({
+      url: '/monitoring-points/',
+      method: 'GET',
+      params
+    })
+  },
+
+  // 获取启用的监测点列表
+  getActiveMonitoringPoints: () => {
+    return request({
+      url: '/monitoring-points/active/',
+      method: 'GET'
+    })
+  },
+
+  // 获取单个监测点
+  getMonitoringPoint: (id) => {
+    return request({
+      url: `/monitoring-points/${id}/`,
+      method: 'GET'
+    })
+  },
+
+  // 创建监测点
+  createMonitoringPoint: (data) => {
+    return request({
+      url: '/monitoring-points/',
+      method: 'POST',
+      data
+    })
+  },
+
+  // 更新监测点
+  updateMonitoringPoint: (id, data) => {
+    return request({
+      url: `/monitoring-points/${id}/`,
+      method: 'PUT',
+      data
+    })
+  },
+
+  // 删除监测点
+  deleteMonitoringPoint: (id) => {
+    return request({
+      url: `/monitoring-points/${id}/`,
+      method: 'DELETE'
+    })
+  }
+}
+
 export default request

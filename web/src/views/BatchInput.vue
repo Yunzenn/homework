@@ -80,7 +80,25 @@
                 {{ field.label }}
               </label>
               <div class="input-wrapper">
+                <!-- 监测点下拉选择 -->
+                <select 
+                  v-if="key === 'point_id'"
+                  v-model="singleRecord[key]" 
+                  class="form-input"
+                  @change="validateField(key)"
+                >
+                  <option value="" disabled>{{ field.placeholder }}</option>
+                  <option 
+                    v-for="point in monitoringPoints" 
+                    :key="point.id" 
+                    :value="point.point_id"
+                  >
+                    {{ point.point_id }} - {{ point.name }}
+                  </option>
+                </select>
+                <!-- 其他普通输入框 -->
                 <input 
+                  v-else
                   :type="field.type" 
                   v-model="singleRecord[key]" 
                   :placeholder="field.placeholder"
@@ -137,7 +155,16 @@
           <div class="quick-toolbar">
             <div class="toolbar-group">
               <label class="toolbar-label">快速填充监测点:</label>
-              <input type="text" v-model="quickFill.point_id" placeholder="输入监测点ID" class="toolbar-input" />
+              <select v-model="quickFill.point_id" class="toolbar-input">
+                <option value="">选择监测点</option>
+                <option 
+                  v-for="point in monitoringPoints" 
+                  :key="point.id" 
+                  :value="point.point_id"
+                >
+                  {{ point.point_id }} - {{ point.name }}
+                </option>
+              </select>
               <button class="toolbar-btn" @click="quickFillColumn('point_id')">填充列</button>
             </div>
             <div class="toolbar-group">
@@ -178,7 +205,25 @@
                 <tbody>
                   <tr v-for="(row, index) in tableData" :key="index" class="data-row" :class="getRowClass(row)">
                     <td v-for="(field, key) in tableFields" :key="key" class="data-cell">
+                      <!-- 监测点下拉选择 -->
+                      <select 
+                        v-if="key === 'point_id'"
+                        v-model="row[key]" 
+                        class="cell-input"
+                        @change="validateRow(index)"
+                      >
+                        <option value="">选择监测点</option>
+                        <option 
+                          v-for="point in monitoringPoints" 
+                          :key="point.id" 
+                          :value="point.point_id"
+                        >
+                          {{ point.point_id }} - {{ point.name }}
+                        </option>
+                      </select>
+                      <!-- 其他普通输入框 -->
                       <input 
+                        v-else
                         :type="field.type" 
                         v-model="row[key]" 
                         :step="field.step"
@@ -307,7 +352,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { waterQualityApi } from '@/api/waterQuality'
+import { waterQualityApi, monitoringPointApi } from '@/api/waterQuality'
 
 const route = useRoute()
 const router = useRouter()
@@ -319,9 +364,52 @@ const editRecordId = computed(() => route.params.id)
 // 输入方式
 const inputMethod = ref('table')
 
+// 监测点数据
+const monitoringPoints = ref([])
+const selectedMonitoringPoint = ref(null)
+
+// 加载监测点数据
+const loadMonitoringPoints = async () => {
+  try {
+    console.log('开始加载监测点...')
+    
+    // 先尝试加载启用的监测点
+    const response = await monitoringPointApi.getActiveMonitoringPoints()
+    console.log('API响应:', response)
+    
+    // 直接使用响应数据
+    if (response && response.length > 0) {
+      monitoringPoints.value = response
+      console.log('监测点数据加载成功，数量:', response.length)
+    } else {
+      console.log('启用监测点为空，加载所有监测点...')
+      // 如果启用监测点为空，加载所有监测点
+      const allResponse = await monitoringPointApi.getMonitoringPoints()
+      console.log('所有监测点响应:', allResponse)
+      
+      // 处理分页响应
+      if (allResponse && allResponse.results) {
+        monitoringPoints.value = allResponse.results
+        console.log('监测点数据加载成功(分页格式)，数量:', allResponse.results.length)
+      } else if (allResponse && Array.isArray(allResponse)) {
+        monitoringPoints.value = allResponse
+        console.log('监测点数据加载成功(数组格式)，数量:', allResponse.length)
+      } else {
+        console.error('未知的响应格式:', allResponse)
+        monitoringPoints.value = []
+      }
+    }
+    
+  } catch (error) {
+    console.error('加载监测点失败:', error)
+    console.error('错误详情:', error.response?.data || error.message)
+    ElMessage.error('加载监测点失败: ' + (error.response?.data?.detail || error.message))
+  }
+}
+
 // 表单字段配置
 const formFields = ref({
-  point_id: { label: '监测点ID', type: 'text', icon: '📍', placeholder: '如：监测点001' },
+  point_id: { label: '监测点', type: 'select', icon: '📍', placeholder: '请选择监测点' },
   date: { label: '日期', type: 'date', icon: '📅', placeholder: '选择日期' },
   time: { label: '时间', type: 'time', icon: '🕐', placeholder: '选择时间' },
   chlorine: { label: '余氯(mg/L)', type: 'number', icon: '🧪', step: '0.1', placeholder: '0.0' },
@@ -332,7 +420,7 @@ const formFields = ref({
 })
 
 const tableFields = ref({
-  point_id: { label: '监测点', type: 'text', step: '' },
+  point_id: { label: '监测点', type: 'select', step: '' },
   date: { label: '日期', type: 'date', step: '' },
   time: { label: '时间', type: 'time', step: '' },
   chlorine: { label: '余氯', type: 'number', step: '0.1' },
@@ -724,6 +812,7 @@ const loadEditRecord = async () => {
 
 onMounted(() => {
   // 初始化
+  loadMonitoringPoints()
   loadEditRecord()
 })
 </script>

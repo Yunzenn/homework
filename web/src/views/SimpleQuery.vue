@@ -46,7 +46,7 @@
                 <input 
                   type="text" 
                   v-model="queryConditions.point_id" 
-                  placeholder="输入监测点编号，如：监测点001" 
+                  placeholder="输入监测点" 
                   class="form-input"
                 />
               </div>

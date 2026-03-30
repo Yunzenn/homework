@@ -137,7 +137,7 @@
         <div class="form-footer">
           <p>
             已有账号？
-            <router-link to="/login" class="login-link">
+            <router-link to="/enhanced-login" class="login-link">
               立即登录
             </router-link>
           </p>
@@ -359,7 +359,7 @@ const handleRegister = async () => {
     
     if (result.success) {
       ElMessage.success('注册成功！请登录您的账户')
-      router.push('/login')
+      router.push('/enhanced-login')
     } else {
       ElMessage.error(result.error)
     }

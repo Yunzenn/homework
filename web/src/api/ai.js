@@ -88,6 +88,88 @@ const aiApi = {
   // 清空对话历史
   clearHistory: (params) => {
     return post('/ai/history/clear/', params)
+  },
+
+  // Vercel AI SDK流式对话（失败时由调用方回退到普通接口）
+  streamChat: async (data, handlers = {}) => {
+    // Vite开发环境下 /api 通常代理到Django，Vercel函数不可直接访问
+    if (import.meta.env.DEV) {
+      throw new Error('DEV环境禁用Vercel流式接口，自动回退到Django接口')
+    }
+
+    const { onChunk, onComplete } = handlers
+    const config = aiApi.getAIConfig()
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+
+    const response = await fetch('/api/vercel-ai/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({
+        ...data,
+        ai_config: config
+      })
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `流式请求失败: ${response.status}`)
+    }
+
+    if (!response.body) {
+      throw new Error('流式响应为空')
+    }
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    let fullText = ''
+
+    const processLine = (line) => {
+      const trimmed = line.trim()
+      if (!trimmed || !trimmed.startsWith('data:')) return
+
+      const payloadText = trimmed.slice(5).trim()
+      if (!payloadText || payloadText === '[DONE]') return
+
+      try {
+        const payload = JSON.parse(payloadText)
+        if (payload.type === 'text-delta' && typeof payload.delta === 'string') {
+          fullText += payload.delta
+          if (onChunk) onChunk(fullText, payload.delta)
+        }
+      } catch {
+        // ignore non-json chunks
+      }
+    }
+
+    while (true) {
+      const { value, done } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || ''
+
+      for (const line of lines) {
+        processLine(line)
+      }
+    }
+
+    if (buffer) {
+      processLine(buffer)
+    }
+
+    if (onComplete) onComplete(fullText)
+
+    return {
+      success: true,
+      data: {
+        message: fullText
+      }
+    }
   }
 }
 

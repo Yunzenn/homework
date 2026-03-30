@@ -8,6 +8,7 @@ import BatchInput from '@/views/BatchInput.vue'
 import DataAnalysis from '@/views/DataAnalysis.vue'
 import Alerts from '@/views/Alerts.vue'
 import AIChat from '@/views/AIChat.vue'
+import MonitoringPoints from '@/views/MonitoringPoints.vue'
 import EnhancedAnimatedLogin from '@/views/login/EnhancedAnimatedLogin.vue'
 import Register from '@/views/login/Register.vue'
 import ForgotPassword from '@/views/login/ForgotPassword.vue'
@@ -16,6 +17,10 @@ import ResetPassword from '@/views/login/ResetPassword.vue'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    {
+      path: '/login',
+      redirect: '/enhanced-login'
+    },
     {
       path: '/enhanced-login',
       name: 'EnhancedAnimatedLogin',
@@ -95,6 +100,12 @@ const router = createRouter({
           name: 'AIChat',
           component: AIChat,
           meta: { title: 'AI智能助手', requiresAuth: true }
+        },
+        {
+          path: '/monitoring-points',
+          name: 'MonitoringPoints',
+          component: MonitoringPoints,
+          meta: { title: '监测点管理', requiresAuth: true }
         }
       ]
     },

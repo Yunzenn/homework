@@ -5,7 +5,7 @@
       <div class="welcome-left">
         <h2 class="greeting">{{ greeting }}，{{ user?.username || '管理员' }}</h2>
         <div class="weather-info">
-          <span class="weather">🌤 北京 20°C</span>
+          <span class="weather">🌤 浙江杭州 20°C</span>
           <span class="suggestion">适合进行水质监测</span>
         </div>
       </div>

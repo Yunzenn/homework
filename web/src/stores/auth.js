@@ -65,9 +65,10 @@ export const useAuthStore = defineStore('auth', () => {
       storage.setItem('roles', JSON.stringify(response.user.roles || []))
       
       // 如果有refresh token，也保存
-      if (response.refreshToken) {
-        refreshToken.value = response.refreshToken
-        storage.setItem('refreshToken', response.refreshToken)
+      const nextRefreshToken = response.refreshToken || response.refresh_token
+      if (nextRefreshToken) {
+        refreshToken.value = nextRefreshToken
+        storage.setItem('refreshToken', nextRefreshToken)
       }
       
       return { success: true, data: response }
@@ -117,6 +118,11 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('user')
       localStorage.removeItem('permissions')
       localStorage.removeItem('roles')
+      sessionStorage.removeItem('token')
+      sessionStorage.removeItem('refreshToken')
+      sessionStorage.removeItem('user')
+      sessionStorage.removeItem('permissions')
+      sessionStorage.removeItem('roles')
       
       // 跳转到登录页
       router.push('/enhanced-login')
@@ -255,9 +261,18 @@ export const useAuthStore = defineStore('auth', () => {
   // 初始化用户状态（从localStorage恢复）
   const initializeAuth = () => {
     try {
-      const savedUser = localStorage.getItem('user')
-      const savedPermissions = localStorage.getItem('permissions')
-      const savedRoles = localStorage.getItem('roles')
+      const savedToken = localStorage.getItem('token') || sessionStorage.getItem('token')
+      const savedRefreshToken = localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken')
+      const savedUser = localStorage.getItem('user') || sessionStorage.getItem('user')
+      const savedPermissions = localStorage.getItem('permissions') || sessionStorage.getItem('permissions')
+      const savedRoles = localStorage.getItem('roles') || sessionStorage.getItem('roles')
+
+      if (savedToken) {
+        token.value = savedToken
+      }
+      if (savedRefreshToken) {
+        refreshToken.value = savedRefreshToken
+      }
       
       if (savedUser) {
         user.value = JSON.parse(savedUser)

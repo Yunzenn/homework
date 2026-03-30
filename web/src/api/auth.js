@@ -14,7 +14,7 @@ export const authApi = {
   // 用户注册
   register: (userData) => {
     return request({
-      url: '/auth/register',
+      url: '/auth/register/',
       method: 'POST',
       data: userData
     })
@@ -23,7 +23,7 @@ export const authApi = {
   // 用户退出
   logout: () => {
     return request({
-      url: '/auth/logout',
+      url: '/auth/logout/',
       method: 'POST'
     })
   },
@@ -31,7 +31,7 @@ export const authApi = {
   // 刷新token
   refreshToken: (refreshToken) => {
     return request({
-      url: '/auth/refresh',
+      url: '/auth/refresh/',
       method: 'POST',
       data: { refresh_token: refreshToken }
     })
@@ -40,7 +40,7 @@ export const authApi = {
   // 获取用户资料
   getProfile: () => {
     return request({
-      url: '/profile',
+      url: '/profile/',
       method: 'GET'
     })
   },
@@ -48,7 +48,7 @@ export const authApi = {
   // 更新用户资料
   updateProfile: (userData) => {
     return request({
-      url: '/profile',
+      url: '/profile/',
       method: 'PUT',
       data: userData
     })
@@ -57,7 +57,7 @@ export const authApi = {
   // 修改密码
   changePassword: (passwordData) => {
     return request({
-      url: '/auth/change-password',
+      url: '/auth/change-password/',
       method: 'POST',
       data: passwordData
     })
@@ -66,7 +66,7 @@ export const authApi = {
   // 忘记密码
   forgotPassword: (email) => {
     return request({
-      url: '/auth/forgot-password',
+      url: '/auth/forgot-password/',
       method: 'POST',
       data: { email }
     })
@@ -75,7 +75,7 @@ export const authApi = {
   // 重置密码
   resetPassword: (token, newPassword) => {
     return request({
-      url: '/auth/reset-password',
+      url: '/auth/reset-password/',
       method: 'POST',
       data: {
         token,
@@ -91,7 +91,7 @@ export const authApi = {
     formData.append('avatar', file)
     
     return request({
-      url: '/profile/avatar',
+      url: '/profile/avatar/',
       method: 'POST',
       data: formData,
       headers: {
@@ -106,7 +106,7 @@ export const userApi = {
   // 获取用户列表
   getUsers: (params) => {
     return request({
-      url: '/users',
+      url: '/users/',
       method: 'GET',
       params
     })
@@ -115,7 +115,7 @@ export const userApi = {
   // 获取用户详情
   getUser: (id) => {
     return request({
-      url: `/users/${id}`,
+      url: `/users/${id}/`,
       method: 'GET'
     })
   },
@@ -123,7 +123,7 @@ export const userApi = {
   // 创建用户
   createUser: (userData) => {
     return request({
-      url: '/users',
+      url: '/users/',
       method: 'POST',
       data: userData
     })
@@ -132,7 +132,7 @@ export const userApi = {
   // 更新用户
   updateUser: (id, userData) => {
     return request({
-      url: `/users/${id}`,
+      url: `/users/${id}/`,
       method: 'PUT',
       data: userData
     })
@@ -141,7 +141,7 @@ export const userApi = {
   // 删除用户
   deleteUser: (id) => {
     return request({
-      url: `/users/${id}`,
+      url: `/users/${id}/`,
       method: 'DELETE'
     })
   },
@@ -149,7 +149,7 @@ export const userApi = {
   // 分配角色
   assignRole: (userId, roleId) => {
     return request({
-      url: `/users/${userId}/role`,
+      url: `/users/${userId}/role/`,
       method: 'PUT',
       data: { role_id: roleId }
     })
@@ -158,7 +158,7 @@ export const userApi = {
   // 更新用户状态
   updateUserStatus: (userId, isActive, lockReason = '') => {
     return request({
-      url: `/users/${userId}/status`,
+      url: `/users/${userId}/status/`,
       method: 'PUT',
       data: {
         is_active: isActive,
@@ -173,7 +173,7 @@ export const roleApi = {
   // 获取角色列表
   getRoles: (params) => {
     return request({
-      url: '/roles',
+      url: '/roles/',
       method: 'GET',
       params
     })
@@ -182,7 +182,7 @@ export const roleApi = {
   // 获取角色详情
   getRole: (id) => {
     return request({
-      url: `/roles/${id}`,
+      url: `/roles/${id}/`,
       method: 'GET'
     })
   },
@@ -190,7 +190,7 @@ export const roleApi = {
   // 创建角色
   createRole: (roleData) => {
     return request({
-      url: '/roles',
+      url: '/roles/',
       method: 'POST',
       data: roleData
     })
@@ -199,7 +199,7 @@ export const roleApi = {
   // 更新角色
   updateRole: (id, roleData) => {
     return request({
-      url: `/roles/${id}`,
+      url: `/roles/${id}/`,
       method: 'PUT',
       data: roleData
     })
@@ -208,7 +208,7 @@ export const roleApi = {
   // 删除角色
   deleteRole: (id) => {
     return request({
-      url: `/roles/${id}`,
+      url: `/roles/${id}/`,
       method: 'DELETE'
     })
   },
@@ -216,7 +216,7 @@ export const roleApi = {
   // 获取权限列表
   getPermissions: () => {
     return request({
-      url: '/permissions',
+      url: '/permissions/',
       method: 'GET'
     })
   }
@@ -227,7 +227,7 @@ export const logApi = {
   // 获取登录日志
   getLoginLogs: (params) => {
     return request({
-      url: '/logs/login',
+      url: '/logs/login/',
       method: 'GET',
       params
     })
@@ -236,7 +236,7 @@ export const logApi = {
   // 获取操作日志
   getOperationLogs: (params) => {
     return request({
-      url: '/logs/operation',
+      url: '/logs/operation/',
       method: 'GET',
       params
     })
@@ -245,7 +245,7 @@ export const logApi = {
   // 获取用户操作日志
   getUserOperationLogs: (userId, params) => {
     return request({
-      url: `/logs/user/${userId}`,
+      url: `/logs/user/${userId}/`,
       method: 'GET',
       params
     })
